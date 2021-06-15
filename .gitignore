@@ -1,0 +1,11 @@
+.vscode
+a.out
+parts/*
+hexdump
+hexdump_reconstruct
+LDC.pdf
+*_reconstruct*
+a.txt
+a_reconstruct.txt
+encode
+decode
