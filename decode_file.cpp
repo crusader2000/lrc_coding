@@ -126,6 +126,7 @@ int main()
         f.close();
     }
 
+
     for(int i=0;i<l;i++){
         string filename = "parts/myfile_local_"+to_string(i+1);
         ifstream f(filename);
@@ -169,6 +170,21 @@ int main()
     cout<<"LOCATIONS MISSING "<<locations.size()<<endl;
     for(auto it:locations)
         cout<<it<<endl;
+
+    // for(int i=0;i<l;i++){
+    //     vector<int> parts_missing;
+    //     for(auto it:locations){
+    //         if(it>=i*(data_length/l) && it<(i+1)*(data_length/l)){
+    //             parts_missing.push_back(it);
+    //         }
+    //     }
+    //     string filename = "parts/myfile_local_"+to_string(i+1);
+    //     ifstream f(filename);
+    //     if(parts_missing.size() == 1 && f){
+    //         regenerate_part(read_file,parts_missing[0]);
+    //     }
+
+    // }
     // cout<<read_file<<endl;
     
     cout<<"DECODE FILES"<<endl;
@@ -177,19 +193,19 @@ int main()
         string part = read_file.substr(i*code_length,code_length);
         schifra::reed_solomon::block<code_length,fec_length> block(part.substr(0,data_length),part.substr(data_length,fec_length));
 
-        part = str_main.substr(i*data_length,data_length);
-        cout<<part<<" "<<part.size()<<endl;
-        for(auto it:part)
-            cout<<(int) it<<" ";
-        cout<<endl;
+        // part = str_main.substr(i*data_length,data_length);
+        // cout<<part<<" "<<part.size()<<endl;
+        // for(auto it:part)
+        //     cout<<(int) it<<" ";
+        // cout<<endl;
         
         string decoded_message = "";
         decoded_message.resize(data_length,0x00);
-        block.data_to_string(decoded_message);
-        cout<<decoded_message<<" "<<decoded_message.size()<<endl;
-        for(auto it:decoded_message)
-            cout<<(int) it<<" ";
-        cout<<endl;
+        // block.data_to_string(decoded_message);
+        // cout<<decoded_message<<" "<<decoded_message.size()<<endl;
+        // for(auto it:decoded_message)
+        //     cout<<(int) it<<" ";
+        // cout<<endl;
         if (!decoder.decode(block,locations))
         {
             std::cout <<i<<"Error - Critical decoding failure! "
@@ -202,11 +218,11 @@ int main()
         // decoded_message.erase(find(decoded_message.begin(), decoded_message.end(), 0x00), decoded_message.end());
         decoded_message.erase(find(decoded_message.begin(), decoded_message.end(), '\0'), decoded_message.end());
         
-        cout<<decoded_message<<" "<<decoded_message.size()<<endl;
-        for(auto it:decoded_message)
-            cout<<(int) it<<" ";
-        cout<<endl;
-        cout<<"----------------------"<<endl;
+        // cout<<decoded_message<<" "<<decoded_message.size()<<endl;
+        // for(auto it:decoded_message)
+        //     cout<<(int) it<<" ";
+        // cout<<endl;
+        // cout<<"----------------------"<<endl;
         reconstructed_message +=decoded_message;
         // cout<<decoded_message<<endl;
     }

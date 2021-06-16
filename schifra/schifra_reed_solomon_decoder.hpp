@@ -384,7 +384,7 @@ namespace schifra
                   ++rsblock.zero_numerators;
             }
             // std::cout<<"LOC 10"<<std::endl;
-            std::cout<<lambda.deg()<<" "<<static_cast<int>(rsblock.errors_detected)<<std::endl;
+            // std::cout<<lambda.deg()<<" "<<static_cast<int>(rsblock.errors_detected)<<std::endl;
             if (lambda.deg() == static_cast<int>(rsblock.errors_detected)){
                // std::cout<<"LOC 11"<<std::endl;
                return true;
