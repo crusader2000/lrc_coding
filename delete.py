@@ -3,7 +3,7 @@ import random
 
 path = "parts/myfile_"
 
-remove_parts = random.sample(range(255), 20)
+remove_parts = random.sample(range(9), 2)
 print(remove_parts)
 
 for num in remove_parts:

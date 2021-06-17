@@ -9,3 +9,15 @@ a.txt
 a_reconstruct.txt
 encode
 decode
+
+CMakeFiles
+CMakeFiles/*
+CMakeCache.txt
+CMakeLists.txt
+compile_commands.json
+cmake_install.cmake
+Makefile
+
+libs
+libs/*
+.vscode
