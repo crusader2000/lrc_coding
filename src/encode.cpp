@@ -4,6 +4,7 @@
 #include<sstream>
 #include<sys/stat.h>
 #include<vector>
+#include <chrono>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,7 @@
 typedef unsigned char u8;
 
 using namespace std;
+using namespace std::chrono;
 
 string convertToString(u8* a,int size)
 {
@@ -37,13 +39,36 @@ string convertToString(u8* a,int size)
     return s;
 }
 
+void xor_func(u8* res, u8* s,int size){
+    for(int i=0;i<size;i++){
+        res[i] = (u8)((int)res[i] ^ (int)s[i]);
+    }
+}
+
+std::string format_duration( std::chrono::microseconds ms ) {
+    using namespace std::chrono;
+    auto secs = duration_cast<seconds>(ms);
+    ms -= duration_cast<microseconds>(secs);
+    auto mins = duration_cast<minutes>(secs);
+    secs -= duration_cast<seconds>(mins);
+    auto hour = duration_cast<hours>(mins);
+    mins -= duration_cast<minutes>(hour);
+
+    std::stringstream ss;
+    ss << hour.count() << " Hours : " << mins.count() << " Minutes : " << secs.count() << " Seconds : " << ms.count() << " Microseconds";
+    return ss.str();
+}
+
 int main(int argc, char *argv[]){
 
-	int k = 7, r = 2;
+	int k = 6, r = 2;
     int n = k+r;
-    int l = 3; // Number of local groups
+    int l = 2; // Number of local groups
 
 	int nerrs = 0;
+
+    // Get starting timepoint
+    auto start = high_resolution_clock::now();
 
 	// Fragment buffer pointers
 	u8 *frag_ptrs[MMAX];
@@ -170,34 +195,61 @@ int main(int argc, char *argv[]){
 
     for(int i=0;i<n;i++){
 
-        string tmp = convertToString(frag_ptrs[i],parts);
+        // string tmp = convertToString(frag_ptrs[i],parts);
 
         string filename = "parts/myfile_"+to_string(i+1);
         ofstream outfile(filename,ios::out | ios::binary);
-        outfile.write(tmp.c_str(),tmp.size());        
+        outfile.write((char*) frag_ptrs[i],parts);        
         outfile.close();
     }
+        // cout<<endl;     
+        // cout<<endl;     
     
-    // // GENERATING LRC BLOCK CODES
-    // for(int i=0;i<l;i++){
-    //     vector<string> local_group;
-        
-    //     for(int j=0;j<data_length/l;j++){
-    //         string tmp="";
-    //         for(int k=0;k<parts;k++){
-    //             tmp += full_encode[i*(data_length/l)+j+k*data_length];
-    //         }
-    //         local_group.push_back(tmp);
-    //         // cout<<tmp<<endl;
-    //     }
+    // GENERATING LRC BLOCK CODES
+    u8 *local_block_ptr;
+    local_block_ptr = (u8*) malloc(parts);
 
-    //     string result = local_block(local_group);
+    for(i=0;i<l;i++){
+        for(j=0;j<parts;j++){
+            local_block_ptr[j] = 0;
+        }   
+        // for(int j=0;j<20;j++){
+        //     cout<<(int) local_block_ptr[j]<<" ";
+        // }
+        // cout<<endl;     
+        for(int j=0;j<(k/l);j++){
+            xor_func(local_block_ptr,frag_ptrs[i*(k/l)+j],parts);
+            // for(int k=0;k<20;k++){
+            //     cout<<(int) local_block_ptr[k]<<" ";
+            // }
+            // cout<<endl;
 
-    //     string filename = "parts/myfile_local_"+to_string(i+1);
-    //     ofstream outfile(filename,ios::out | ios::binary);
-    //     outfile.write(result.c_str(),result.size());        
-    //     outfile.close();
-    // }
+        }
 
+        // for(int k=0;k<20;k++){
+        //     cout<<(int) local_block_ptr[k]<<" ";
+        // }
+        // cout<<endl;
+        //     cout<<endl;
+
+
+        // string result = convertToString(local_block_ptr,parts);
+
+        string filename = "parts/myfile_local_"+to_string(i+1);
+        ofstream outfile(filename,ios::out | ios::binary);
+        outfile.write((char*)local_block_ptr,parts);        
+        outfile.close();
+    }
+    // Get ending timepoint
+    auto stop = high_resolution_clock::now();
+  
+    // Get duration. Substart timepoints to 
+    // get durarion. To cast it to proper unit
+    // use duration cast method
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    cout << "Time taken by function: "
+         << format_duration(duration_cast<std::chrono::microseconds>(stop - start)) << endl;
+	
     exit(0);
 }
