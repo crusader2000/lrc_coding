@@ -9,6 +9,7 @@ a.txt
 a_reconstruct.txt
 encode
 decode
+decode_rs
 test*
 
 CMakeFiles

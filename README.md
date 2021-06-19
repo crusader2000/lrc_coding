@@ -4,6 +4,11 @@ Repository containing codes w.r.t. MITACS Internship
 This is a coding technique used for Error Correction in Data Centers. It is used in Azure Storage. Ceph, an open source storage system, has plugins which allow using LRC in case of node failures.
 
 ### ISAL
+Run the following command to clone ISA github repo in libs directory
+```
+bash ./libs/get_libs.bash
+```
+If installation fails, Go to ``libs/isa-l/README`` and follow the instructions present based on your OS.
 
 ### Encoding of Files
 The files are first converted to a hexfile using the ```xxd``` command
@@ -27,3 +32,13 @@ To check the differences between original and reconstructed file, you can use th
 diff file_name file_name_reconstruct
 ```
 
+### Encode and S3 Upload
+After the ``encode.py`` and ``decode.py`` are hosted on servers like Amazon EC2, run the following command to upload files from Amazon S3
+```
+python3 encode.py file_name1 file_name2
+```
+
+To decode or cache,
+```
+python3 decode.py file_name1 file_name2
+```

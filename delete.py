@@ -1,7 +1,11 @@
 import os
 import random
 
-path = "parts/myfile_"
+name = "LDC"
+# name = "a"
+# name = "test"
+
+path = "parts/"+name+"_"
 
 remove_parts = random.sample(range(8), 2)
 print(remove_parts)

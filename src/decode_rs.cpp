@@ -131,90 +131,11 @@ void decode_data(int n,int k, int r, int parts,vector<int> frag_err_list,u8 **fr
     }
 }
 
-void xor_func(u8* res, u8* s,int size){
-	for(int i=0;i<size;i++){
-		res[i] = (u8)((int)res[i] ^ (int)s[i]);
-	}
-}
 
-
-vector<int> decode_local_groups(int n, int k, int r, int l, int parts, vector<int> frag_present_list,vector<int> frag_err_list,u8 **frag_ptrs,string name){
-	
-	int i,j;
-	
-	for(i = 0;i<l;i++){
-		int count = 0;
-		int curr = 0;
-		vector<int> local_group;
-
-        string filename = "parts/"+name+"_local_"+to_string(i+1);
-        ifstream f(filename, ifstream::binary); //taking file as inputstream
-        string str;
-
-		if(!f) continue;
-
-
-		while((curr != frag_present_list.size())){
-			if(frag_present_list[curr]>=((i)*(k/l)) && frag_present_list[curr]<((i+1)*(k/l))){
-				local_group.push_back(frag_present_list[curr]);
-				// cout<<frag_present_list[curr]<<endl;
-				count++;
-			}
-			// cout<<"HERE"<<endl;
-			curr++;
-		}
-		// cout<<"count - "<<count<<endl;
-		if(count == ((k/l)-1)){
-
-			cout<<"DECODING LOCAL GROUP "<<(i+1)<<endl;
-			
-			ostringstream ss;
-            ss << f.rdbuf(); // reading data
-            str = ss.str();
-            f.close();
-
-			int missing_idx;
-			
-			for(int j=((i)*(k/l));j<((i+1)*(k/l));j++){
-				auto it = find(local_group.begin(), local_group.end(), j);
-				if (it == local_group.end()){
-					missing_idx = j;
-					break;
-				}
-			}
-
-			cout<<"MISSING INDEX "<<missing_idx<<endl;
-			for(int j=0;j<parts;j++){
-                frag_ptrs[missing_idx][j] = (u8) str[j];
-            }
-			// for(int k=0;k<20;k++){
-			// 	cout<<(int) frag_ptrs[missing_idx][k]<<" ";
-			// }
-			// cout<<endl;
-
-			for(auto it:local_group){
-				// cout<<"PRESENT INDEX "<<it<<endl;
-				xor_func(frag_ptrs[missing_idx],frag_ptrs[it],parts);
-				// 		for(int k=0;k<20;k++){
-				// cout<<(int) frag_ptrs[missing_idx][k]<<" ";
-			// }
-			// cout<<endl;
-
-			}
-			// cout<<endl;
-
-			frag_err_list.erase(std::find(frag_err_list.begin(),frag_err_list.end(),missing_idx));
-			// remove(frag_err_list.begin(),frag_err_list.end(),missing_idx);
-
-		}
-	}
-	return frag_err_list;
-}
-
-int file_size(int code_length,string name){
+int file_size(int code_length){
     string str;
     for(int i=0;i<code_length;i++){
-        string filename = "parts/"+name+"_"+to_string(i+1);
+        string filename = "parts/myfile_"+to_string(i+1);
         ifstream f(filename, ifstream::binary); 
         if(f) {
             ostringstream ss;
@@ -237,7 +158,9 @@ void write_reconstruct_file(int k,int parts,u8** frag_ptrs){
 			lrow_count++;
 
 	// cout<<"LAST ROW COUNT "<<lrow_count<<endl;
-	string filename = "hexdump_reconstruct";
+	string main_extension = "";
+    string main_filename = "hexdump";
+    string filename = main_filename+"_reconstruct"+main_extension;
     ofstream outfile(filename, ios::out | ios::binary);
 
     const char *array = reconstructed_message.c_str();
@@ -283,13 +206,12 @@ int main(int argc, char *argv[]){
 	vector<int> frag_present_list;
 
     int i;
-    string name;
-    name = string(argv[1]);
-    cout<<"FILENAME : "<<name<<endl;
-
+    string main_extension = "";
+    string main_filename = "hexdump";
+    cout<<"MAIN FILENAME "<<main_filename<<endl;
 
 	printf("ec_simple_example:\n");
-    int parts = file_size(n,name);
+    int parts = file_size(n);
     cout<<"PARTS : "<<parts<<endl;
 
 	// Allocate the src & parity buffers
@@ -311,7 +233,7 @@ int main(int argc, char *argv[]){
     cout<<"READ FILES"<<endl;
     for(int i=0;i<n;i++){
 
-        string filename = "parts/"+name+"_"+to_string(i+1);
+        string filename = "parts/myfile_"+to_string(i+1);
         ifstream f(filename, ifstream::binary); //taking file as inputstream
         string str;
         // cout<<filename<<endl;
@@ -335,8 +257,6 @@ int main(int argc, char *argv[]){
 
     int j;
 
-	frag_err_list = decode_local_groups(n, k, r, l, parts,frag_present_list,frag_err_list,frag_ptrs,name);
-	cout<<endl;
 	// cout<<endl;
     // for (i = 0; i < n; i++){
 	// 	for (j = 0; j < 20; j++){
@@ -361,11 +281,11 @@ int main(int argc, char *argv[]){
 
 
 	if (src_errs > 0) {
-		if(nerrs > r) {
+		if(src_errs > r) {
 			cout<<"NOT DECODABLE"<<endl;
 			return -1;
 		} else {
-			for(i=0;i<nerrs;i++)
+			for(i=0;i<src_errs;i++)
 				printf("Error at postition - %d\n",frag_err_list[i]);
 		
 			decode_data(n,k, r, parts,frag_err_list,frag_ptrs,recover_srcs,recover_outp);

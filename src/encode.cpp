@@ -5,18 +5,10 @@
 #include<sys/stat.h>
 #include<vector>
 #include <chrono>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <isa-l.h>	
-// #include "../libs/isa-l/isa-l.h"	// use <isa-l.h> instead when linking against installed
-// #include "../libs/isa-l/include/erasure_code.h"
-// #include "../libs/isa-l/include/crc.h"
-// #include "../libs/isa-l/include/crc64.h"
-// #include "../libs/isa-l/include/gf_vect_mul.h"
-// #include "../libs/isa-l/include/igzip_lib.h"
-// #include "../libs/isa-l/include/raid.h"
 
 #define MMAX 255
 #define KMAX 255
@@ -25,19 +17,6 @@ typedef unsigned char u8;
 
 using namespace std;
 using namespace std::chrono;
-
-string convertToString(u8* a,int size)
-{
-    int i;
-    // int size = sizeof(a)/sizeof(a[0]);
-    // cout<<size<<endl;
-    string s = "";
-
-    for (i = 0; i < size; i++) {
-        s = s + (char) a[i];
-    }
-    return s;
-}
 
 void xor_func(u8* res, u8* s,int size){
     for(int i=0;i<size;i++){
@@ -72,23 +51,17 @@ int main(int argc, char *argv[]){
 
 	// Fragment buffer pointers
 	u8 *frag_ptrs[MMAX];
-	u8 *frag_ptrs_recover[MMAX];
-	u8 *recover_srcs[KMAX];
-	u8 *recover_outp[KMAX];
-	u8 frag_err_list[MMAX];
 
 	// Coefficient matrices
-	u8 *encode_matrix, *decode_matrix;
-	u8 *invert_matrix, *temp_matrix;
-	u8 *g_tbls;
-	u8 decode_index[MMAX];
+	u8 *encode_matrix;
+    u8 *g_tbls;
 
 
-    string main_extension = "";
-    string main_filename = "hexdump";
-    cout<<"MAIN FILENAME "<<main_filename<<endl;
+    string name;
+    name = string(argv[1]);
+    cout<<"FILENAME : "<<name<<endl;
 
-    ifstream f(main_filename+main_extension,  ios::in | ios::binary ); //taking file as inputstream
+    ifstream f("hexdump",  ios::in | ios::binary ); //taking file as inputstream
     string str;
     if(f) {
         ostringstream ss;
@@ -117,35 +90,21 @@ int main(int argc, char *argv[]){
     cout<<"FILESIZE : "<<str.length()<<endl;
     cout<<"PARTS : "<<parts<<endl;
     int i;
-    for (i = 0; i < r; i++)
-        frag_err_list[nerrs++] = rand() % (k + r);
-
 
 	printf("ec_simple_example:\n");
 
 	// Allocate coding matrices
 	encode_matrix = (u8*) malloc(n * k);
-	decode_matrix = (u8*) malloc(n * k);
-	invert_matrix = (u8*) malloc(n * k);
-	temp_matrix = (u8*) malloc(n * k);
+
 	g_tbls = (u8*) malloc(k * r * 32);
 
-    if (encode_matrix == NULL || decode_matrix == NULL
-	    || invert_matrix == NULL || temp_matrix == NULL || g_tbls == NULL) {
+    if (encode_matrix == NULL || g_tbls == NULL) {
 		printf("Test failure! Error with malloc\n");
 		return -1;
 	}
 	// Allocate the src & parity buffers
 	for (i = 0; i < n; i++) {
 		if (NULL == (frag_ptrs[i] = (u8*) malloc(parts))) {
-			printf("alloc error: Fail\n");
-			return -1;
-		}
-	}
-
-	// Allocate buffers for recovered data
-	for (i = 0; i < r; i++) {
-		if (NULL == (recover_outp[i] = (u8*) malloc(parts))) {
 			printf("alloc error: Fail\n");
 			return -1;
 		}
@@ -197,7 +156,7 @@ int main(int argc, char *argv[]){
 
         // string tmp = convertToString(frag_ptrs[i],parts);
 
-        string filename = "parts/myfile_"+to_string(i+1);
+        string filename = "parts/"+name+"_"+to_string(i+1);
         ofstream outfile(filename,ios::out | ios::binary);
         outfile.write((char*) frag_ptrs[i],parts);        
         outfile.close();
@@ -235,7 +194,7 @@ int main(int argc, char *argv[]){
 
         // string result = convertToString(local_block_ptr,parts);
 
-        string filename = "parts/myfile_local_"+to_string(i+1);
+        string filename = "parts/"+name+"_local_"+to_string(i+1);
         ofstream outfile(filename,ios::out | ios::binary);
         outfile.write((char*)local_block_ptr,parts);        
         outfile.close();

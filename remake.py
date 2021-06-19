@@ -1,9 +1,9 @@
 import subprocess
 
-file_name = "a.txt"
+# file_name = "a.txt"
 # file_name = "test.pdf"
 # file_name = "test.zip"
-# file_name = "LDC.pdf"
+file_name = "LDC.pdf"
 file_name = file_name.split('.')
 
 bashCommand = "xxd -plain -revert hexdump_reconstruct " +file_name[0]+"_reconstruct."+file_name[1]
