@@ -11,7 +11,10 @@ encode
 decode
 decode_rs
 test*
-
+test.py
+pckl
+uploads.csv
+downloads.csv
 CMakeFiles
 CMakeFiles/*
 CMakeCache.txt

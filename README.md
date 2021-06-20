@@ -10,16 +10,19 @@ bash ./libs/get_libs.bash
 ```
 If installation fails, Go to ``libs/isa-l/README`` and follow the instructions present based on your OS.
 
+### Setup Commands
+```
+cmake CMakeLists.txt
+make
+python3 setup.py
+```
+
+
 ### Encoding of Files
 The files are first converted to a hexfile using the ```xxd``` command
 Use the following command to turn any file into a hexdump
 ```
 python3 main.py
-```
-
-```
-cmake CMakeLists.txt
-make
 ```
 
 To get back the original file, use the following command. It will produce a ```file_name_reconstruct``` file using ```xxd -revert```
@@ -41,4 +44,10 @@ python3 encode.py file_name1 file_name2
 To decode or cache,
 ```
 python3 decode.py file_name1 file_name2
+```
+
+### Generate CSVs
+To generate CSVs of Download and Upload Requests, run
+```
+python3 make_csv.py
 ```
