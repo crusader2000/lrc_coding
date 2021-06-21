@@ -33,14 +33,18 @@ def download_api_call(s3,bucket_name,file_name):
     s3.download_file(bucket_name,file_name,'./parts/'+file_name)    
 
 def download_files(s3,file_names,locations):
-    processes = []
-    for name in file_names:
-        p = multiprocessing.Process(target=download_api_call, args=(s3,locations[name],name,))
-        p.start()
-        processes.append(p)
+    p = multiprocessing.Pool()
+    processes_args = []
 
-    for p in processes:
-        p.join()
+    for name in file_names:
+        processes_args.append((s3,locations[name],name))
+        # p = multiprocessing.Process(target=download_api_call, args=(s3,locations[name],name,))
+        # p.start()
+        # processes.append(p)
+
+    p.starmap(download_api_call, processes_args)
+    # for p in processes:
+    #     p.join()
     return
 
 def decode_partitions(file):
@@ -75,7 +79,9 @@ if __name__ == '__main__':
     #     print(k,v)
     dbfile.close()
 
-    loc = ""
+    loc = db["aws_region"]
+    buckets = db["buckets"]
+    location = db["locations"]
     # s3 = connection_S3(loc)
 
     for file in files:

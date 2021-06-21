@@ -11,13 +11,13 @@ import shutil
 import multiprocessing
 import pickle
 
-bucket_name = ["","","","","","",""]
-location = ["","","","","","",""]
-
 k = 6 # Num Data Chunks
 r = 2 # Num Global Parity Chunks
 l = 2 # Num Local Parity Chunks
 n = k + r # Num Code Chunks
+
+access_key_id = ""
+secret_access_key = ""
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
@@ -51,43 +51,59 @@ def make_partitions(file):
     print(output)
     return
 
-def upload_api_call(s3,bucket_name,file_name):
+def get_buckets(bucket_space):
+    indices = np.flip(numpy.argsort(myList))
+    print(indices)
+    random_server_indices = random.sample(indices[:(n+l+3)],n+l)
+    print(random_server_indices)
+    print([buckets[idx] for idx in random_server_indices])
+    return random_server_indices
+
+def upload_api_call(s3,bucket_name,file_path,object_name):
     try:
-        response = s3.upload_file(file_name, bucket_name)
+        response = s3.upload_file(file_path, bucket_name,object_name)
     except ClientError as e:
         pass
 
-
-def upload_files(s3,file):
+def upload_files(s3,file,locations,buckets,bucket_space):
     try:
         name,ext = file.split('.')
     except:
         name = file
 
-    locations = {}
 
-    processes = []
+    processes_args = []
 
     # random allocation of buckets
-    buckets = []
+    buckets_idxs = get_buckets(bucket_space)
+    
+    size = os.path.getsize("parts/"+name+"_"+str(1)) 
 
     for i in range(k+r):
-        locations[name+"_"+str(i+1)] = bucket_name[i]
-        p = multiprocessing.Process(target=upload_api_call, args=(s3,bucket_name[i],name+"_"+str(i+1),))
-        p.start()
-        processes.append(p)
+        locations[name+"_"+str(i+1)] = buckets[buckets_idxs[i]]
+        bucket_space[buckets_idxs[i]] = bucket_space[buckets_idxs[i]] + size
+        processes_args.append((s3,buckets[buckets_idxs[i]],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1)))
+        # p = multiprocessing.Process(target=upload_api_call, 
+        #     args=(s3,buckets[buckets_idxs[i]],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1),))
+        # p.start()
+        # processes.append(p)
     
     for i in range(l):
-        locations[name+"_local_"+str(i+1)] = bucket_name[n+i]    
-        p = multiprocessing.Process(target=upload_api_call, args=(s3,bucket_name[n+i],name+"_local_"+str(i+1),))
-        p.start()
-        processes.append(p)
-    
-    for p in processes:
-        p.join()
+        locations[name+"_local_"+str(i+1)] = buckets[buckets_idxs[n+i]]    
+        bucket_space[buckets_idxs[n+i]] = bucket_space[buckets_idxs[n+i]] + size
+        processes_args.append((s3,buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1)))
+        # p = multiprocessing.Process(target=upload_api_call, 
+        #     args=(s3,buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1),))
+        # p.start()
+        # processes.append(p)
+
+    p = multiprocessing.Pool()
+    p.starmap(upload_api_call, processes_args)
+    # for p in processes:
+    #     p.join()
 
     # return locations
-    return locations
+    return locations,bucket_space
 
 
 # Get the files needed to be encoded from command line
@@ -104,7 +120,9 @@ if __name__ == '__main__':
     files.pop(0)
     print(files)
 
-    loc = ""
+    loc = db["aws_region"]
+    buckets = db["buckets"]
+    bucket_space = db["bucket_space"]
     # s3 = connection_S3(loc)
     
     for file in files:
@@ -115,8 +133,9 @@ if __name__ == '__main__':
         make_partitions(file)
 
         # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-        # location = upload_files(s3,file)
+        # locations,bucket_space = upload_files(s3,file)
         # db["locations"].update(location)
+        # db["bucket_space"] = bucket_space
         
         tb = unix_time_micros()
         time_taken = tb-ta
