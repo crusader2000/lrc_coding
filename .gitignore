@@ -18,11 +18,9 @@ downloads.csv
 CMakeFiles
 CMakeFiles/*
 CMakeCache.txt
-CMakeLists.txt
 compile_commands.json
 cmake_install.cmake
 Makefile
 mumbai.pem
-libs
-libs/*
+libs/isa-l
 .vscode

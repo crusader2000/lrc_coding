@@ -2,6 +2,7 @@ import boto3
 import boto3.session
 import datetime
 import time
+import random
 import numpy as np
 import os
 import csv
@@ -16,8 +17,8 @@ r = 2 # Num Global Parity Chunks
 l = 2 # Num Local Parity Chunks
 n = k + r # Num Code Chunks
 
-access_key_id = ""
-secret_access_key = ""
+access_key_id = ''
+secret_access_key = '' 
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
@@ -52,20 +53,26 @@ def make_partitions(file):
     return
 
 def get_buckets(bucket_space):
-    indices = np.flip(numpy.argsort(myList))
+    indices = np.argsort(bucket_space)
     print(indices)
-    random_server_indices = random.sample(indices[:(n+l+3)],n+l)
+    print([bucket_space[idx] for idx in indices])
+    random_server_indices = random.sample([indices[i] for i in range(n+l+2)],n+l)
+    
+    print("random_server_indices")
     print(random_server_indices)
+    
+    print("[buckets[idx] for idx in random_server_indices]")
     print([buckets[idx] for idx in random_server_indices])
+    print([bucket_space[idx] for idx in random_server_indices])
     return random_server_indices
 
-def upload_api_call(s3,bucket_name,file_path,object_name):
+def upload_api_call(bucket_name,file_path,object_name):
     try:
         response = s3.upload_file(file_path, bucket_name,object_name)
     except ClientError as e:
         pass
 
-def upload_files(s3,file,locations,buckets,bucket_space):
+def upload_files(file,locations,buckets,bucket_space):
     try:
         name,ext = file.split('.')
     except:
@@ -76,13 +83,15 @@ def upload_files(s3,file,locations,buckets,bucket_space):
 
     # random allocation of buckets
     buckets_idxs = get_buckets(bucket_space)
-    
+    print(buckets_idxs) 
+    print(buckets[idx] for idx in buckets_idxs)
+
     size = os.path.getsize("parts/"+name+"_"+str(1)) 
 
     for i in range(k+r):
         locations[name+"_"+str(i+1)] = buckets[buckets_idxs[i]]
-        bucket_space[buckets_idxs[i]] = bucket_space[buckets_idxs[i]] + size
-        processes_args.append((s3,buckets[buckets_idxs[i]],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1)))
+        bucket_space[buckets_idxs[i]] = float(bucket_space[buckets_idxs[i]])+float(size/(1024*1024))
+        processes_args.append((buckets[buckets_idxs[i]],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1)))
         # p = multiprocessing.Process(target=upload_api_call, 
         #     args=(s3,buckets[buckets_idxs[i]],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1),))
         # p.start()
@@ -90,8 +99,8 @@ def upload_files(s3,file,locations,buckets,bucket_space):
     
     for i in range(l):
         locations[name+"_local_"+str(i+1)] = buckets[buckets_idxs[n+i]]    
-        bucket_space[buckets_idxs[n+i]] = bucket_space[buckets_idxs[n+i]] + size
-        processes_args.append((s3,buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1)))
+        bucket_space[buckets_idxs[n+i]] = float(bucket_space[buckets_idxs[n+i]])+float(size/(1024*1024))
+        processes_args.append((buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1)))
         # p = multiprocessing.Process(target=upload_api_call, 
         #     args=(s3,buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1),))
         # p.start()
@@ -123,7 +132,8 @@ if __name__ == '__main__':
     loc = db["aws_region"]
     buckets = db["buckets"]
     bucket_space = db["bucket_space"]
-    # s3 = connection_S3(loc)
+    locations = db["locations"]
+    s3 = connection_S3(loc)
     
     for file in files:
         time = datetime.datetime.now().__str__()
@@ -133,22 +143,26 @@ if __name__ == '__main__':
         make_partitions(file)
 
         # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-        # locations,bucket_space = upload_files(s3,file)
-        # db["locations"].update(location)
-        # db["bucket_space"] = bucket_space
+        locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
+        db["locations"].update(locations)
+        db["bucket_space"] = bucket_space
         
         tb = unix_time_micros()
         time_taken = tb-ta
 
         db["upload_requests"].append([time,file,time_taken])
 
+        try:
+            name,ext = file.split('.')
+        except:
+            name = file
         # Delete unnecessary files and folders
-        # for i in range(k+r):
-        #     if os.path.exists("parts/"+name+"_"+str(i+1)):
-        #         os.remove(name+"_"+str(i+1))
-        # for i in range(l):
-        #     if os.path.exists("parts/"+name+"_local_"+str(i+1)):
-        #         os.remove(name+"_local_"+str(i+1))
+        for i in range(k+r):
+            if os.path.exists("parts/"+name+"_"+str(i+1)):
+                os.remove("parts/"+name+"_"+str(i+1))
+        for i in range(l):
+            if os.path.exists("parts/"+name+"_local_"+str(i+1)):
+                os.remove("parts/"+name+"_local_"+str(i+1))
 
         os.remove('2'+file)
         # os.remove(file)

@@ -17,14 +17,26 @@ if __name__ == '__main__':
     s3 = connection_S3(region)
 
     for i in range(20):
+        location = {'LocationConstraint': region}
+        # s3.create_bucket(Bucket="cachestore"+str(i),
+                                # CreateBucketConfiguration=location)
+        
+        res = s3.list_objects(Bucket = "cachestore"+str(i))
+        print("BUCKET - "+"cachestore"+str(i))
+        # try:
+        #    for x in res['Contents']:
+        #        print(x['Key'])
+        # except:
+        #    pass
+        # print()
+
         try:
-            location = {'LocationConstraint': region}
-            s3.create_bucket(Bucket="cachestore"+str(i),
-                                    CreateBucketConfiguration=location)
+            for x in res['Contents']:
+                print(x['Key'])
+                s3.delete_object(Bucket="cachestore"+str(i), Key=x['Key'])
         except:
-            continue
-    
-    # database
+            pass
+
     db = {
         "locations" : {
             "test" : "location_none"

@@ -10,13 +10,15 @@ import subprocess
 import shutil
 import multiprocessing
 import pickle
-
-bucket_name = ["","","","","","",""]
-location = ["","","","","","",""]
+from itertools import islice
 
 k = 6 # Num Data Chunks
 r = 2 # Num Global Parity Chunks
 l = 2 # Num Local Parity Chunks
+n = k + r
+
+access_key_id = ''
+secret_access_key = ''
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
@@ -29,22 +31,18 @@ def connection_S3(loc):
         region_name=loc)
     return s3
 
-def download_api_call(s3,bucket_name,file_name):
+def download_api_call(bucket_name,file_name):
     s3.download_file(bucket_name,file_name,'./parts/'+file_name)    
 
-def download_files(s3,file_names,locations):
-    p = multiprocessing.Pool()
-    processes_args = []
+def starcall_func(args):
+    return download_api_call(*args)
 
-    for name in file_names:
-        processes_args.append((s3,locations[name],name))
-        # p = multiprocessing.Process(target=download_api_call, args=(s3,locations[name],name,))
-        # p.start()
-        # processes.append(p)
+def download_files(file_names,locations):
+    processes_args = [(locations[name],name) for name in file_names]
 
-    p.starmap(download_api_call, processes_args)
-    # for p in processes:
-    #     p.join()
+    with multiprocessing.Pool() as pool:
+        list(islice(pool.imap_unordered(starcall_func, processes_args), k))
+
     return
 
 def decode_partitions(file):
@@ -81,29 +79,38 @@ if __name__ == '__main__':
 
     loc = db["aws_region"]
     buckets = db["buckets"]
-    location = db["locations"]
-    # s3 = connection_S3(loc)
+    bucket_space = db["bucket_space"]
+    locations = db["locations"]
+    s3 = connection_S3(loc)
 
     for file in files:
         time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
+        try:
+            name,ext = file.split('.')
+        except:
+            name = file
+        file_names = []
         # Download Files
-        # download_files(s3,name,locations)
+        for i in range(2,n):
+            file_names.append(name+"_"+str(i+1))
+        download_files(file_names,locations)
 
         decode_partitions(file)
 
         tb = unix_time_micros()
         time_taken = tb-ta
 
-        db["download_requests"].append([time,file,0,0,time_taken])
+        db["download_requests"].append([time,file,6,0,time_taken])
+
 
         # Delete unnecessary files and folders
-        # for i in range(k+r):
-        #     if os.path.exists(name+"_"+str(i+1)):
-        #         os.remove(name+"_"+str(i+1))
-        # for i in range(l):
-        #     if os.path.exists(name+"_local_"+str(i+1)):
-        #         os.remove(name+"_local_"+str(i+1))
+        for i in range(k+r):
+            if os.path.exists("parts/"+name+"_"+str(i+1)):
+                os.remove("parts/"+name+"_"+str(i+1))
+        for i in range(l):
+           if os.path.exists("parts/"+name+"_local_"+str(i+1)):
+               os.remove("parts/"+name+"_local_"+str(i+1))
 
         os.remove("hexdump_reconstruct")
     
