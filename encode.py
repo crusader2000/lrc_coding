@@ -125,9 +125,22 @@ if __name__ == '__main__':
     #     print(k,v)
     dbfile.close()
 
-    files = sys.argv
-    files.pop(0)
-    print(files)
+    read_from_cmdline = True
+    path = "./"
+    
+    if read_from_cmdline:
+        files = sys.argv
+        files.pop(0)
+        path = "./"
+        print(files)
+    else:
+        files = []
+        with open('trace.csv', mode='w') as trace_file:
+            for row in f.readlines():
+                files.append(row[-1])
+        path = "./files/"
+        print(files)
+
 
     loc = db["aws_region"]
     buckets = db["buckets"]
@@ -138,19 +151,22 @@ if __name__ == '__main__':
     for file in files:
         time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
-        shutil.copyfile(file,'2'+file)
+        # shutil.copyfile(file,'2'+file)
         
-        make_partitions(file)
-
+        make_partitions(path+file)
+        tb = unix_time_micros()
         # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-        locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
+        locations,bucket_space = upload_files(path+file,locations,buckets,bucket_space)
         db["locations"].update(locations)
         db["bucket_space"] = bucket_space
         
-        tb = unix_time_micros()
-        time_taken = tb-ta
+        tc = unix_time_micros()
+        
+        time_to_encode = tb-ta
+        time_to_upload = tc-tb
+        total_time_taken = tc-ta
 
-        db["upload_requests"].append([time,file,time_taken])
+        db["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
 
         try:
             name,ext = file.split('.')
@@ -164,7 +180,7 @@ if __name__ == '__main__':
             if os.path.exists("parts/"+name+"_local_"+str(i+1)):
                 os.remove("parts/"+name+"_local_"+str(i+1))
 
-        os.remove('2'+file)
+        # os.remove('2'+file)
         # os.remove(file)
         os.remove("hexdump")
     

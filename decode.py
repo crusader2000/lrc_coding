@@ -37,11 +37,11 @@ def download_api_call(bucket_name,file_name):
 def starcall_func(args):
     return download_api_call(*args)
 
-def download_files(file_names,locations):
+def download_files(file_names,locations,num_files_download):
     processes_args = [(locations[name],name) for name in file_names]
 
     with multiprocessing.Pool() as pool:
-        list(islice(pool.imap_unordered(starcall_func, processes_args), k))
+        list(islice(pool.imap_unordered(starcall_func, processes_args), num_files_download))
 
     return
 
@@ -62,6 +62,55 @@ def decode_partitions(file):
     output, error = process.communicate()
 
     return
+
+def files_downloaded(name):
+    downloaded_files = os.listdir("./parts")
+    global_blocks = 0
+    local_blocks = 0
+    for i in range(n):
+        if (name+"_"+str(i+1)) in downloaded_files:
+            global_blocks = global_blocks + 1
+    
+    for i in range(l):
+        if (name+"_local_"+str(i+1)) in downloaded_files:
+            local_blocks = local_blocks + 1
+    return global_blocks,local_blocks
+
+def get_mode(ip_mode = 0):
+    file_names = []
+    num_files_download = 0
+    if ip_mode == 0:
+        for i in range(n):
+            file_names.append(name+"_"+str(i+1))
+        num_files_download = k
+    elif ip_mode == 1:
+        for i in range(n-1,-1,-1):
+            file_names.append(name+"_"+str(i+1))
+        num_files_download = k
+    elif ip_mode == 2:
+        for i in range(k):
+            file_names.append(name+"_"+str(i+1))
+        num_files_download = k
+    elif ip_mode == 3:
+        for i in range(k):
+            file_names.append(name+"_"+str(i+1))
+        for i in range(l):
+            file_names.append(name+"_"+str(i+1))
+        num_files_download = k
+    elif ip_mode == 4:
+        for i in range(l):
+            file_names.append(name+"_"+str(i+1))
+        for i in range(k):
+            file_names.append(name+"_"+str(i+1))
+        num_files_download = k
+    elif ip_mode == 5:
+        for i in range(n):
+            file_names.append(name+"_"+str(i+1))
+        for i in range(l):
+            file_names.append(name+"_"+str(i+1))
+        num_files_download = k+l
+
+    return file_names,num_files_download
 
 # Get the files needed to be encoded from command line
 if __name__ == '__main__':
@@ -90,19 +139,35 @@ if __name__ == '__main__':
             name,ext = file.split('.')
         except:
             name = file
-        file_names = []
+
+        # ip_mode
+        # 0 : 1 to n global chunks (any k)
+        # 1 : n to 1 global chunks (any k)
+        # 2 : 1 to k global chunks (any k)
+        # 3 : 1 to k global chunks and 1 to l local chunks (any k)
+        # 4 : 1 to l global chunks and 1 to k local chunks (any k)
+        # 5 : 1 to n global chunks and 1 to l local chunks (any k+l)
+
+        ip_mode = 3
+        
+        file_names,num_files_download = get_mode(ip_mode)
+
         # Download Files
-        for i in range(2,n):
-            file_names.append(name+"_"+str(i+1))
-        download_files(file_names,locations)
+        download_files(file_names,locations,num_files_download)
+        
+        tb = unix_time_micros()
 
         decode_partitions(file)
 
-        tb = unix_time_micros()
-        time_taken = tb-ta
+        tc = unix_time_micros()
 
-        db["download_requests"].append([time,file,6,0,time_taken])
+        time_to_download = tb-ta
+        time_to_decode = tc-tb
+        total_time_taken = tc-ta
 
+        global_blocks,local_blocks = files_downloaded(name)
+        db["download_requests"].append([time,file,os.listdir("./parts"),global_blocks,local_blocks,time_to_download,time_to_decode,total_time_taken])
+        
 
         # Delete unnecessary files and folders
         for i in range(k+r):
@@ -112,7 +177,8 @@ if __name__ == '__main__':
            if os.path.exists("parts/"+name+"_local_"+str(i+1)):
                os.remove("parts/"+name+"_local_"+str(i+1))
 
-        os.remove("hexdump_reconstruct")
+        if os.path.exists("hexdump_reconstruct"):
+            os.remove("hexdump_reconstruct")
     
     dbfile = open('pckl', 'wb')
     pickle.dump(db, dbfile)

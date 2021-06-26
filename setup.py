@@ -29,8 +29,12 @@ if __name__ == '__main__':
         "locations" : {
             "test" : "location_none"
         },
-        "upload_requests" : [["Time","File Name","Time Taken (in microseconds)"]],
-        "download_requests" : [["Time","File Name","Num Global Blocks","Num Local Parity","Time Taken (in microseconds)"]],
+        "upload_requests" : [["Time","File Name","Time To Encode (in microseconds)",
+        "Time To Upload (in microseconds)","Total Time Taken (in microseconds)"]],
+        "download_requests" : [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)"]],
+        "upload_vanilla" : [["Time","File Name","Time Taken (in microseconds)"]],
+        "download_vanilla" : [["Time","File Name","Time Taken (in microseconds)"]],
+        "cache_requests": [["Time","File Name","Cache Hit","Time Taken (in microseconds)"]],
         "aws_region" : region,
         "buckets" : ["cachestore"+str(i) for i in range(20)],
         "bucket_space" : [0 for i in range(20)]

@@ -24,6 +24,20 @@ void xor_func(u8* res, u8* s,int size){
     }
 }
 
+
+char* readFileBytes(const char *name)
+{
+    ifstream fl(name);
+    fl.seekg( 0, ios::end );
+    size_t len = fl.tellg();
+    char *ret = new char[len];
+    fl.seekg(0, ios::beg); 
+    fl.read(ret, len);
+    fl.close();
+    return ret;
+}
+
+
 std::string format_duration( std::chrono::microseconds ms ) {
     using namespace std::chrono;
     auto secs = duration_cast<seconds>(ms);
