@@ -48,16 +48,18 @@ def download_files(file_names,locations,num_files_download):
 def decode_partitions(file):
     try:
         name,ext = file.split('.')
+        ext = '.'+ext
     except:
         name = file
+        ext = ''
 
     bashCommand = "./decode " + name
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output.decode('UTF-8')
     print(output)
-
-    bashCommand = "xxd -plain -revert hexdump_reconstruct " +name+"_reconstruct."+ext
+    print(name)
+    bashCommand = "xxd -plain -revert hexdump_reconstruct " +name+"_reconstruct"+ext
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
 
@@ -120,16 +122,21 @@ if __name__ == '__main__':
     print(files)
 
     # Get pickle file
-    dbfile = open('pckl', 'rb')
-    db = pickle.load(dbfile)
+    dbfile = open('pckl_download', 'rb')
+    db_download = pickle.load(dbfile)
     # for k,v in db.items():
     #     print(k,v)
     dbfile.close()
 
-    loc = db["aws_region"]
-    buckets = db["buckets"]
-    bucket_space = db["bucket_space"]
-    locations = db["locations"]
+    dbfile = open('pckl_upload', 'rb')
+    db_upload = pickle.load(dbfile)
+    # for k,v in db.items():
+    #     print(k,v)
+    dbfile.close()
+    
+    loc= db_upload["aws_region"]
+    buckets= db_upload["buckets"]
+    locations= db_upload["locations"]
     s3 = connection_S3(loc)
 
     for file in files:
@@ -148,7 +155,7 @@ if __name__ == '__main__':
         # 4 : 1 to l global chunks and 1 to k local chunks (any k)
         # 5 : 1 to n global chunks and 1 to l local chunks (any k+l)
 
-        ip_mode = 3
+        ip_mode = 1
         
         file_names,num_files_download = get_mode(ip_mode)
 
@@ -166,8 +173,8 @@ if __name__ == '__main__':
         total_time_taken = tc-ta
 
         global_blocks,local_blocks = files_downloaded(name)
-        db["download_requests"].append([time,file,os.listdir("./parts"),global_blocks,local_blocks,time_to_download,time_to_decode,total_time_taken])
-        
+        db_download["download_requests"].append([time,file,os.listdir("./parts"),global_blocks,local_blocks,time_to_download,time_to_decode,total_time_taken])
+        # print(db_download["download_requests"]) 
 
         # Delete unnecessary files and folders
         for i in range(k+r):
@@ -180,6 +187,9 @@ if __name__ == '__main__':
         if os.path.exists("hexdump_reconstruct"):
             os.remove("hexdump_reconstruct")
     
-    dbfile = open('pckl', 'wb')
-    pickle.dump(db, dbfile)
+    print("PRNITNG DB") 
+    dbfile = open('pckl_download', 'wb')
+    pickle.dump(db_download, dbfile)
     dbfile.close()
+
+

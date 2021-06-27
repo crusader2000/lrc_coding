@@ -20,19 +20,21 @@ with open('requests.txt','r') as f:
     # first_line = f.readline()
     # start_time = float(first_line.split(' ')[1])
     # print(start_time)
-
+    count = 0
     for row in f.readlines():
         row = row.strip()
         items = row.split(' ')
         items.pop(-1)
         items.pop(0)
         url = items[-1]
-        # r = requests.get(url, allow_redirects=True)
         filename = url.rsplit('/', 1)[1]
-        # items[1] = float(items[1])-start_time
         items.append(cheaphash(filename.encode('utf-8')))
-        # open("files/"+items[-1], 'wb').write(r.content)
+        if not os.path.exists("files/"+filename):
+            r = requests.get(url, allow_redirects=True)
+            open("files/"+items[-1], 'wb').write(r.content)
         data.append(items)
+        count = count + 1
+        print(count)
 
 # print(data)
 

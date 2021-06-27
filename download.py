@@ -37,16 +37,17 @@ if __name__ == '__main__':
     print(files)
 
     # Get pickle file
-    dbfile = open('pckl', 'rb')
-    db = pickle.load(dbfile)
-    # for k,v in db.items():
-    #     print(k,v)
+    dbfile = open('pckl_download', 'rb')
+    db_download = pickle.load(dbfile)
     dbfile.close()
 
-    loc = db["aws_region"]
-    buckets = db["buckets"]
-    bucket_space = db["bucket_space"]
-    locations = db["locations"]
+    dbfile = open('pckl_upload', 'rb')
+    db_upload = pickle.load(dbfile)
+    dbfile.close()
+
+    loc= db_upload["aws_region"]
+    buckets= db_upload["buckets"]
+    locations= db_upload["locations"]
     s3 = connection_S3(loc)
 
     for file in files:
@@ -58,14 +59,14 @@ if __name__ == '__main__':
         tb = unix_time_micros()
         time_taken = tb-ta
 
-        db["download_vanilla"].append([time,file,time_taken])
+        db_download["download_vanilla"].append([time,file,time_taken])
         
 
         # Delete unnecessary files and folders
 
-        if os.path.exists("parts/"+file):
-            os.remove("parts/"+file)
+        if os.path.exists("./parts/"+file):
+            os.remove("./parts/"+file)
     
-    dbfile = open('pckl', 'wb')
-    pickle.dump(db, dbfile)
+    dbfile = open('pckl_download', 'wb')
+    pickle.dump(db_download, dbfile)
     dbfile.close()

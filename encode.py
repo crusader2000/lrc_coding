@@ -11,6 +11,7 @@ import subprocess
 import shutil
 import multiprocessing
 import pickle
+from time import sleep
 
 k = 6 # Num Data Chunks
 r = 2 # Num Global Parity Chunks
@@ -18,7 +19,7 @@ l = 2 # Num Local Parity Chunks
 n = k + r # Num Code Chunks
 
 access_key_id = ''
-secret_access_key = '' 
+secret_access_key = ''
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
@@ -31,13 +32,13 @@ def connection_S3(loc):
         region_name=loc)
     return s3
 
-def make_partitions(file):
+def make_partitions(path,file):
     try:
         name,ext = file.split('.')
     except:
         name = file
 
-    bashCommand = "xxd -plain " +file+" hexdump"
+    bashCommand = "xxd -plain " +path+file+" hexdump"
 
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
@@ -119,13 +120,13 @@ def upload_files(file,locations,buckets,bucket_space):
 if __name__ == '__main__':
     
     # Get pickle file
-    dbfile = open('pckl', 'rb')
-    db = pickle.load(dbfile)
+    dbfile = open('pckl_upload', 'rb')
+    db_upload = pickle.load(dbfile)
     # for k,v in db.items():
     #     print(k,v)
     dbfile.close()
 
-    read_from_cmdline = True
+    read_from_cmdline = False
     path = "./"
     
     if read_from_cmdline:
@@ -135,55 +136,72 @@ if __name__ == '__main__':
         print(files)
     else:
         files = []
-        with open('trace.csv', mode='w') as trace_file:
-            for row in f.readlines():
-                files.append(row[-1])
+        with open('trace.csv', mode='r') as trace_file:
+            trace_reader = csv.reader(trace_file)
+            for row in list(trace_reader):
+                files.append(str(row[-1]))
+        files.pop(0)
         path = "./files/"
+        
         print(files)
 
 
-    loc = db["aws_region"]
-    buckets = db["buckets"]
-    bucket_space = db["bucket_space"]
-    locations = db["locations"]
+    loc = db_upload["aws_region"]
+    buckets = db_upload["buckets"]
+    bucket_space = db_upload["bucket_space"]
+    locations = db_upload["locations"]
     s3 = connection_S3(loc)
     
+    count = 0
     for file in files:
-        time = datetime.datetime.now().__str__()
-        ta = unix_time_micros()
+
         # shutil.copyfile(file,'2'+file)
         
-        make_partitions(path+file)
-        tb = unix_time_micros()
-        # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-        locations,bucket_space = upload_files(path+file,locations,buckets,bucket_space)
-        db["locations"].update(locations)
-        db["bucket_space"] = bucket_space
-        
-        tc = unix_time_micros()
-        
-        time_to_encode = tb-ta
-        time_to_upload = tc-tb
-        total_time_taken = tc-ta
-
-        db["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
-
         try:
             name,ext = file.split('.')
         except:
             name = file
-        # Delete unnecessary files and folders
-        for i in range(k+r):
-            if os.path.exists("parts/"+name+"_"+str(i+1)):
-                os.remove("parts/"+name+"_"+str(i+1))
-        for i in range(l):
-            if os.path.exists("parts/"+name+"_local_"+str(i+1)):
-                os.remove("parts/"+name+"_local_"+str(i+1))
+        print("-------------------------------")
+        if str(name+"_1") in list(locations.keys()):
+            continue
 
-        # os.remove('2'+file)
-        # os.remove(file)
-        os.remove("hexdump")
-    
-    dbfile = open('pckl', 'wb')
-    pickle.dump(db, dbfile)
+        if count < 10:
+            count = count + 1
+        else:
+            break
+        print(name,file)
+        try:
+            time = datetime.datetime.now().__str__()
+            ta = unix_time_micros()
+            make_partitions(path,file)
+            tb = unix_time_micros()
+            # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
+            locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
+            db_upload["locations"].update(locations)
+            db_upload["bucket_space"] = bucket_space
+        
+            tc = unix_time_micros()
+        
+            time_to_encode = tb-ta
+            time_to_upload = tc-tb
+            total_time_taken = tc-ta
+
+            db_upload["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
+
+            # Delete unnecessary files and folders
+            for i in range(k+r):
+                if os.path.exists("parts/"+name+"_"+str(i+1)):
+                    os.remove("parts/"+name+"_"+str(i+1))
+            for i in range(l):
+                if os.path.exists("parts/"+name+"_local_"+str(i+1)):
+                    os.remove("parts/"+name+"_local_"+str(i+1))
+
+          # os.remove('2'+file)
+            # os.remove(file)
+            os.remove("hexdump")
+            # print(db) 
+        except:
+            pass
+    dbfile = open('pckl_upload', 'wb')
+    pickle.dump(db_upload, dbfile)
     dbfile.close()
