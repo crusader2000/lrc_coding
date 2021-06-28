@@ -22,6 +22,8 @@ secret_access_key = ''
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
+failed_nodes = ["cachestore1","cachestore9"] # hard code
+
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
 
@@ -114,6 +116,34 @@ def get_mode(ip_mode = 0):
 
     return file_names,num_files_download
 
+def get_files(locations,name):
+    file_locations = [locations[name+"_"+str(i+1)] for i in range(n)]
+    file_locations.append(locations[name+"_local_"+str(i+1)] for i in range(l))
+
+    final_file_names = []
+    num_parity_used = 0
+    for i in range(l):
+        if num_parity_used > r:
+            return
+        count = (k/l)
+        for j in range(k/l):
+            if file_locations[i*(k/l)+j] in failed_nodes:
+                count = count - 1
+            else:
+                final_file_names.append(name+"_"+str(i*(k/l)+j+1))
+
+        if count == (k/l):
+            continue
+        elif count == ((k/l)-1):
+            final_file_names.append(name+"_local_"+str(i+1))
+        else:
+            while count != (k/l):
+                count = count + 1
+                final_file_names.append(name+"_"+str(k+num_parity_used+1))
+                num_parity_used = num_parity_used + 1
+    
+    return final_file_names
+
 # Get the files needed to be encoded from command line
 if __name__ == '__main__':
     
@@ -156,11 +186,13 @@ if __name__ == '__main__':
         # 5 : 1 to n global chunks and 1 to l local chunks (any k+l)
 
         ip_mode = 1
-        
-        file_names,num_files_download = get_mode(ip_mode)
+
+        file_names = get_files(locations,name)
+        # file_names,num_files_download = get_mode(ip_mode)
 
         # Download Files
-        download_files(file_names,locations,num_files_download)
+        # download_files(file_names,locations,num_files_download)
+        download_files(file_names,locations,len(file_names))
         
         tb = unix_time_micros()
 
@@ -191,5 +223,3 @@ if __name__ == '__main__':
     dbfile = open('pckl_download', 'wb')
     pickle.dump(db_download, dbfile)
     dbfile.close()
-
-

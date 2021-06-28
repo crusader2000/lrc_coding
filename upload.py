@@ -29,7 +29,7 @@ def connection_S3(loc):
 
 def get_buckets(bucket_space):
     indices = np.argsort(bucket_space)
-    return indices[0]
+    return indices[:3]
 
 def upload_api_call(s3,bucket_name,file_path,object_name):
     try:
@@ -80,15 +80,16 @@ if __name__ == '__main__':
         try:
             ta = unix_time_micros()
         
-            idx = get_buckets(bucket_space)
-            size = os.path.getsize(path+file) 
-            bucket_space[idx] = float(bucket_space[idx])+float(size/(1024*1024))
-            locations[file] = buckets[idx]
-            upload_api_call(s3,buckets[idx],path+file,file)
+            indices = get_buckets(bucket_space)
+            for i,idx in enumerate(indices):
+                size = os.path.getsize(path+file) 
+                bucket_space[idx] = float(bucket_space[idx])+float(size/(1024*1024))
+                locations[file+"_"+str(i+1)] = buckets[idx]
+                upload_api_call(s3,buckets[idx],path+file,file+"_"+str(i+1))
+                print("Uploading To - ",buckets[idx])
             
             tb = unix_time_micros()
             time_taken = tb-ta
-            print("Uploading To - ",buckets[idx])
 
             db_upload["upload_vanilla"].append([time,file,time_taken])
         except:

@@ -11,11 +11,14 @@ import shutil
 import multiprocessing
 import pickle
 from itertools import islice
+import random
 
 access_key_id = ''
 secret_access_key = ''
 
 epoch = datetime.datetime.utcfromtimestamp(0)
+
+failed_nodes = ["cachestore1","cachestore9"] # hard code
 
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
@@ -26,8 +29,11 @@ def connection_S3(loc):
         region_name=loc)
     return s3
 
-def download_api_call(bucket_name,file_name):
-    s3.download_file(bucket_name,file_name,'./parts/'+file_name)    
+def download_api_call(bucket_name,object_name,file_name):
+    if bucket_name in failed_nodes:
+        return False
+    s3.download_file(bucket_name,object_name,'./parts/'+file_name)
+    return True
 
 # Get the files needed to be encoded from command line
 if __name__ == '__main__':
@@ -54,7 +60,13 @@ if __name__ == '__main__':
         time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
         # Download Files
-        download_api_call(locations[file],file)
+        order = range(3)
+        random.shuffle(order)
+        for i in order:
+            if download_api_call(locations[file+"_"+str(i+1)],file+"_"+str(i+1),file):
+                break
+            else:
+                time.sleep(1)
         
         tb = unix_time_micros()
         time_taken = tb-ta
