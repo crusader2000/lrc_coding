@@ -30,3 +30,6 @@ backup
 backup/*
 *.csv
 temp.py
+key_ids
+pckl_*
+trace.csv
