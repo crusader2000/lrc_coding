@@ -57,12 +57,10 @@ if __name__ == '__main__':
     s3 = connection_S3(loc)
 
     for file in files:
-        time = datetime.datetime.now().__str__()
+        curr_time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
         # Download Files
-        order = range(3)
-        random.shuffle(order)
-        for i in order:
+        for i in range(3):
             if download_api_call(locations[file+"_"+str(i+1)],file+"_"+str(i+1),file):
                 break
             else:
@@ -71,7 +69,7 @@ if __name__ == '__main__':
         tb = unix_time_micros()
         time_taken = tb-ta
 
-        db_download["download_vanilla"].append([time,file,time_taken])
+        db_download["download_vanilla"].append([curr_time,file,time_taken])
         
 
         # Delete unnecessary files and folders

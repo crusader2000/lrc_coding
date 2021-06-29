@@ -18,8 +18,7 @@ l = 2 # Num Local Parity Chunks
 n = k + r
 
 access_key_id = ''
-secret_access_key = ''
-
+secret_access_key = '' 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
 failed_nodes = ["cachestore1","cachestore9"] # hard code
@@ -125,19 +124,19 @@ def get_files(locations,name):
     for i in range(l):
         if num_parity_used > r:
             return
-        count = (k/l)
-        for j in range(k/l):
-            if file_locations[i*(k/l)+j] in failed_nodes:
+        count = int(k/l)
+        for j in range(int(k/l)):
+            if file_locations[i*int(k/l)+j] in failed_nodes:
                 count = count - 1
             else:
-                final_file_names.append(name+"_"+str(i*(k/l)+j+1))
+                final_file_names.append(name+"_"+str(i*int(k/l)+j+1))
 
-        if count == (k/l):
+        if count == int(k/l):
             continue
-        elif count == ((k/l)-1):
+        elif count == (int(k/l)-1):
             final_file_names.append(name+"_local_"+str(i+1))
         else:
-            while count != (k/l):
+            while count != int(k/l):
                 count = count + 1
                 final_file_names.append(name+"_"+str(k+num_parity_used+1))
                 num_parity_used = num_parity_used + 1

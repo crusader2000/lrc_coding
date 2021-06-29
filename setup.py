@@ -2,7 +2,7 @@ import pickle
 import boto3
 
 access_key_id = ''
-secret_access_key = ''
+secret_access_key = '' 
 
 def connection_S3(loc):
     s3 = boto3.client('s3',aws_access_key_id = access_key_id,

@@ -19,8 +19,7 @@ l = 2 # Num Local Parity Chunks
 n = k + r # Num Code Chunks
 
 access_key_id = ''
-secret_access_key = ''
-
+secret_access_key = '' 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
 def unix_time_micros():
@@ -57,7 +56,7 @@ def get_buckets(bucket_space):
     indices = np.argsort(bucket_space)
     print(indices)
     print([bucket_space[idx] for idx in indices])
-    random_server_indices = random.sample([indices[i] for i in range(n+l+2)],n+l)
+    random_server_indices = random.sample([indices[i] for i in range(n+l+1)],n+l)
     
     print("random_server_indices")
     print(random_server_indices)
@@ -71,6 +70,7 @@ def upload_api_call(bucket_name,file_path,object_name):
     try:
         response = s3.upload_file(file_path, bucket_name,object_name)
     except ClientError as e:
+        print("NOT HERE")
         pass
 
 def upload_files(file,locations,buckets,bucket_space):
@@ -84,11 +84,10 @@ def upload_files(file,locations,buckets,bucket_space):
 
     # random allocation of buckets
     buckets_idxs = get_buckets(bucket_space)
-    print(buckets_idxs) 
     print(buckets[idx] for idx in buckets_idxs)
 
     size = os.path.getsize("parts/"+name+"_"+str(1)) 
-
+    
     for i in range(k+r):
         locations[name+"_"+str(i+1)] = buckets[buckets_idxs[i]]
         bucket_space[buckets_idxs[i]] = float(bucket_space[buckets_idxs[i]])+float(size/(1024*1024))
@@ -106,7 +105,6 @@ def upload_files(file,locations,buckets,bucket_space):
         #     args=(s3,buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1),))
         # p.start()
         # processes.append(p)
-
     p = multiprocessing.Pool()
     p.starmap(upload_api_call, processes_args)
     # for p in processes:
@@ -177,6 +175,7 @@ if __name__ == '__main__':
             tb = unix_time_micros()
             # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
             locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
+           #  print(locations,bucket_space) 
             db_upload["locations"].update(locations)
             db_upload["bucket_space"] = bucket_space
         
