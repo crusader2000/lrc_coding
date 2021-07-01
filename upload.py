@@ -12,8 +12,9 @@ import shutil
 import multiprocessing
 import pickle
 
-access_key_id = ''
-secret_access_key = ''
+
+access_key_id = 'AKIAZFE27KY2ZF6I7E5L'
+secret_access_key = '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' 
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 

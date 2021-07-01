@@ -18,8 +18,9 @@ r = 2 # Num Global Parity Chunks
 l = 2 # Num Local Parity Chunks
 n = k + r # Num Code Chunks
 
-access_key_id = ''
-secret_access_key = '' 
+
+access_key_id = 'AKIAZFE27KY2ZF6I7E5L'
+secret_access_key = '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' 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
 def unix_time_micros():

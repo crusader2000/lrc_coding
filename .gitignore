@@ -21,7 +21,7 @@ CMakeCache.txt
 compile_commands.json
 cmake_install.cmake
 Makefile
-mumbai.pem
+*.pem
 libs/isa-l
 .vscode
 files
@@ -30,3 +30,6 @@ backup
 backup/*
 *.csv
 temp.py
+!urls.csv
+pckl*
+key_ids
