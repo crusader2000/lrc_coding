@@ -15,7 +15,7 @@ def connection_S3(loc):
 if __name__ == '__main__':
 
     regions = ['ap-south-1',
-    'ap-southeast-1',
+    'ap-northeast-2',
     'ap-northeast-1',
     'ap-southeast-1',]
     

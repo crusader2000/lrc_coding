@@ -21,7 +21,7 @@ CMakeCache.txt
 compile_commands.json
 cmake_install.cmake
 Makefile
-mumbai.pem
+*.pem
 libs/isa-l
 .vscode
 files
@@ -33,3 +33,4 @@ temp.py
 key_ids
 pckl_*
 trace.csv
+requests.txt
