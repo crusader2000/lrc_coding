@@ -6,12 +6,6 @@ secret_access_key = 'E1CBUZy7zYrObfKSu2grKffxSZJ0bbGOCsIfqS8H'
  
 
 
-    # Access Key ID:
-    # AKIAXJULJPQNZCGYW7H7
-    # Secret Access Key:
-    # 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
-
-
 def connection_S3(loc):
     s3 = boto3.client('s3',aws_access_key_id = access_key_id,
         aws_secret_access_key=secret_access_key,
@@ -21,10 +15,10 @@ def connection_S3(loc):
 if __name__ == '__main__':
     
     regions = ['ap-south-1',
-    'ap-southeast-1',
+    'ap-northeast-2',
     'ap-northeast-1',
     'ap-southeast-1',]
-
+    
     # database
     db_upload = {
         "locations" : {

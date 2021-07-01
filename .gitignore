@@ -30,7 +30,6 @@ backup
 backup/*
 *.csv
 temp.py
+!urls.csv
+pckl*
 key_ids
-pckl_*
-trace.csv
-requests.txt
