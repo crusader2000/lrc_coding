@@ -14,7 +14,6 @@ epoch = datetime.datetime.utcfromtimestamp(0)
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
 
-
 def add_to_queue(queue,finish):
     finish.value = False
     with open('trace.csv', mode='r') as trace_file:
@@ -71,7 +70,7 @@ def caching(queue,finish):
         ta = unix_time_micros()
         print(curr_time)
         file = queue.pop(0)
-        print("CHECKING FILE - ",file)
+        print("CHECKING FILE - ",file,len(queue))
         result = client.get(file)
         cache_hit = 1
         try:

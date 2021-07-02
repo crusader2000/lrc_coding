@@ -7,8 +7,11 @@ with open('trace.csv', mode='r') as trace_file:
     print("NUMBER OF REQUESTS PER SEC - ",(len(data)-1)/float(data[-1][0]))
     print("Total Number of Requests - ",(len(data)-1))
 
-files = list(os.listdir("files/"))
-print("Average File Size - %f MBs" %(os.path.getsize("files/")/(1024*1024*len(files))))
+files = list(os.listdir("files2/"))
+dir_size = 0
+for file in files:
+    dir_size = dir_size + os.path.getsize("files2/"+file)
+print("Average File Size - %f MBs" %(dir_size/(1024*1024*len(files))))
 
 print("-----------------------------------------------")
 print("Coding")
@@ -53,3 +56,4 @@ with open('download_vanilla.csv',mode='r') as download_vanilla_file:
         total_latency = total_latency + float(int(data[i][2])/1000000)
 
     print("Average Latency (sec /req) - ",total_latency/(len(data)-1))
+

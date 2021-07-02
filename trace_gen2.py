@@ -4,6 +4,7 @@ import re
 import hashlib
 import os
 import itertools
+import shutil
 
 def cheaphash(string,length=6):
     if length<len(hashlib.sha256(string).hexdigest()):
@@ -14,13 +15,25 @@ def cheaphash(string,length=6):
 if not os.path.exists("./files"):
     os.mkdir("./files")
 
+if not os.path.exists("./files2"):
+    os.mkdir("./files2")
+
 urls = []
+files_available = []
 
 with open('urls.csv', mode='r') as url_file:
-    url_reader = csv.reader(url_file)
-    urls = list(itertools.chain.from_iterable(list(url_reader)))
+     url_reader = csv.reader(url_file)
+     urls = list(itertools.chain.from_iterable(list(url_reader)))
+     for url in urls:
+         print(url)
+         filename = url.rsplit('/', 1)[1]
+         if not os.path.exists("files/"+filename):
+             r = requests.get(url, allow_redirects=True)
+             open("files/"+filename, 'wb').write(r.content)
+         files_available.append(filename)
 
-len_urls = len(urls)
+len_files = len(files_available)
+data = []
 # print(urls)
 with open('requests.txt','r') as f:
 
@@ -36,9 +49,8 @@ with open('requests.txt','r') as f:
         dead_url = items[-1] # Only using this to create new filenames
         filename = dead_url.rsplit('/', 1)[1]
         items.append(cheaphash(filename.encode('utf-8')))
-        if not os.path.exists("files/"+filename):
-            r = requests.get(urls[count % len_urls], allow_redirects=True)
-            open("files/"+items[-1], 'wb').write(r.content)
+        if not os.path.exists("files2/"+filename):
+            shutil.copy("files/"+files_available[count % len_files], "files2/"+items[-1])
         data.append(items)
         count = count + 1
         print(count)
@@ -59,3 +71,4 @@ with open('trace.csv', mode='w') as trace_file:
     for row in data:
         print(row)
         trace_writer.writerow(row)
+
