@@ -15,9 +15,8 @@ def connection_S3(loc):
 if __name__ == '__main__':
     
     regions = ['ap-south-1',
-    'ap-northeast-2',
     'ap-northeast-1',
-    'ap-southeast-1',]
+    'ap-southeast-1']
     
     # database
     db_upload = {
@@ -44,17 +43,17 @@ if __name__ == '__main__':
         print("SETTING UP CONNS")
         s3_conns.append(connection_S3(loc))
 
-    for i in range(len(regions)):
-    # for i in range(1,2):
+    #for i in range(len(regions)):
+    for i in range(1):
         for j in range(10):
-            try:
+          try:
                 print("cachestoregeo"+str(i*10+j))
                 location = {'LocationConstraint': regions[i]}
                 s3_conns[i].create_bucket(Bucket="cachestoregeo"+str(i*10+j),
                                         CreateBucketConfiguration=location)
                 db_upload["buckets"].append(["cachestoregeo"+str(i*10+j),i])
-            except:
-                continue
+          except:
+              continue
     
 
     # Its important to use binary mode

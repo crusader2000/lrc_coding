@@ -23,7 +23,7 @@ secret_access_key = 'E1CBUZy7zYrObfKSu2grKffxSZJ0bbGOCsIfqS8H'
  
 epoch = datetime.datetime.utcfromtimestamp(0)
 
-failed_nodes = ["cachestoregeo1","cachestoregeo9"] # hard code
+failed_nodes = ["cachestoregeo1","cachestoregeo15","cachestore29"] # hard code
 
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
@@ -43,7 +43,7 @@ def starcall_func(args):
 def download_files(file_names,locations,num_files_download):
     processes_args = [(locations[name][1],locations[name][0],name) for name in file_names]
 
-    with multiprocessing.Pool() as pool:
+    with multiprocessing.Pool(3) as pool:
         list(islice(pool.imap_unordered(starcall_func, processes_args), num_files_download))
 
     return

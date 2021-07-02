@@ -70,7 +70,7 @@ def caching(queue,finish):
         ta = unix_time_micros()
         print(curr_time)
         file = queue.pop(0)
-        print("CHECKING FILE - ",file)
+        print("CHECKING FILE - ",file,len(queue))
         result = client.get(file)
         cache_hit = 1
         try:

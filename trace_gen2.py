@@ -21,16 +21,16 @@ if not os.path.exists("./files2"):
 urls = []
 files_available = []
 
-# with open('urls.csv', mode='r') as url_file:
-#     url_reader = csv.reader(url_file)
-#     urls = list(itertools.chain.from_iterable(list(url_reader)))
-#     for url in urls:
-#         print(url)
-#         filename = url.rsplit('/', 1)[1]
-#         if not os.path.exists("files/"+filename):
-#             r = requests.get(url, allow_redirects=True)
-#             open("files/"+filename, 'wb').write(r.content)
-#         files_available.append(filename)
+with open('urls.csv', mode='r') as url_file:
+     url_reader = csv.reader(url_file)
+     urls = list(itertools.chain.from_iterable(list(url_reader)))
+     for url in urls:
+         print(url)
+         filename = url.rsplit('/', 1)[1]
+         if not os.path.exists("files/"+filename):
+             r = requests.get(url, allow_redirects=True)
+             open("files/"+filename, 'wb').write(r.content)
+         files_available.append(filename)
 
 len_files = len(files_available)
 data = []
@@ -49,8 +49,8 @@ with open('requests.txt','r') as f:
         dead_url = items[-1] # Only using this to create new filenames
         filename = dead_url.rsplit('/', 1)[1]
         items.append(cheaphash(filename.encode('utf-8')))
-        # if not os.path.exists("files2/"+filename):
-        #     shutil.copy("files/"+files_available[count % len_files], "files2/"+items[-1])
+        if not os.path.exists("files2/"+filename):
+            shutil.copy("files/"+files_available[count % len_files], "files2/"+items[-1])
         data.append(items)
         count = count + 1
         print(count)

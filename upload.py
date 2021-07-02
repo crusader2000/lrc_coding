@@ -76,15 +76,17 @@ if __name__ == '__main__':
             for row in list(trace_reader):
                 files.append(str(list(row)[-1]))
         files.pop(0)
-        path = "./files/"
+        path = "./files2/"
 
         print(files)
 
-    for file in files:
+    for i,file in enumerate(files):
+            print(i,file)
             time = datetime.datetime.now().__str__()
         # try:
             ta = unix_time_micros()
-        
+            if file+"_copy_1" in list(locations.keys()):
+                continue
             indices = get_buckets(bucket_space)
             for i,idx in enumerate(indices):
                 size = os.path.getsize(path+file) 

@@ -69,11 +69,11 @@ def get_buckets(bucket_space):
     return random_server_indices
 
 def upload_api_call(i,bucket_name,file_path,object_name):
-    try:
+    # try:
         response = s3_conns[i].upload_file(file_path, bucket_name,object_name)
-    except ClientError as e:
-        print("NOT HERE")
-        pass
+    # except:
+      #  print("NOT HERE")
+      #  pass
 
 def upload_files(s3_conns,file,locations,buckets,bucket_space):
     try:
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         s3_conns.append(connection_S3(loc))
     
     count = 0
-    for file in files:
+    for i,file in enumerate(files):
 
         # shutil.copyfile(file,'2'+file)
         
@@ -173,7 +173,7 @@ if __name__ == '__main__':
             count = count + 1
         else:
             break
-        print(name,file)
+        print(name,file,i)
         # try:
         time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
@@ -203,7 +203,8 @@ if __name__ == '__main__':
 
         # os.remove('2'+file)
         # os.remove(file)
-        os.remove("hexdump")
+        if os.path.exists("hexdump"):
+            os.remove("hexdump")
         # print(db) 
         # except:
         #     pass
