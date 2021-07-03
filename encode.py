@@ -57,7 +57,7 @@ def get_buckets(bucket_space):
     indices = np.argsort(bucket_space)
     print(indices)
     print([bucket_space[idx] for idx in indices])
-    random_server_indices = random.sample([indices[i] for i in range(n+l+1)],n+l)
+    random_server_indices = random.sample([indices[i] for i in range(n+3)],n)
     
     print("random_server_indices")
     print(random_server_indices)
@@ -98,14 +98,6 @@ def upload_files(file,locations,buckets,bucket_space):
         # p.start()
         # processes.append(p)
     
-    for i in range(l):
-        locations[name+"_local_"+str(i+1)] = buckets[buckets_idxs[n+i]]    
-        bucket_space[buckets_idxs[n+i]] = float(bucket_space[buckets_idxs[n+i]])+float(size/(1024*1024))
-        processes_args.append((buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1)))
-        # p = multiprocessing.Process(target=upload_api_call, 
-        #     args=(s3,buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1),))
-        # p.start()
-        # processes.append(p)
     p = multiprocessing.Pool()
     p.starmap(upload_api_call, processes_args)
     # for p in processes:
@@ -161,47 +153,51 @@ if __name__ == '__main__':
         except:
             name = file
         print("-------------- %d  -----------------" %(i))
-        if str(name+"_1") in list(locations.keys()):
-            continue
+#         if str(name+"_1") in list(locations.keys()):
+ #           continue
 
         if count < 10:
             count = count + 1
         else:
             break
         print(name,file)
-        try:
-            time = datetime.datetime.now().__str__()
-            ta = unix_time_micros()
-            make_partitions(path,file)
-            tb = unix_time_micros()
-            # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-            locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
-           #  print(locations,bucket_space) 
-            db_upload["locations"].update(locations)
-            db_upload["bucket_space"] = bucket_space
+    #    try:
+        time = datetime.datetime.now().__str__()
+        ta = unix_time_micros()
+        make_partitions(path,file)
+        tb = unix_time_micros()
+        # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
+        locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
+        #  print(locations,bucket_space) 
+        db_upload["locations"].update(locations)
+        db_upload["bucket_space"] = bucket_space
         
-            tc = unix_time_micros()
+        tc = unix_time_micros()
+    
+        time_to_encode = tb-ta
+        time_to_upload = tc-tb
+        total_time_taken = tc-ta
+
+        db_upload["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
+
+        print("**************************************")
+        print(db_upload["upload_requests"])
+        # Delete unnecessary files and folders
+        for i in range(k+r):
+             if os.path.exists("parts/"+name+"_"+str(i+1)):
+                os.remove("parts/"+name+"_"+str(i+1))
         
-            time_to_encode = tb-ta
-            time_to_upload = tc-tb
-            total_time_taken = tc-ta
-
-            db_upload["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
-
-            # Delete unnecessary files and folders
-            for i in range(k+r):
-                if os.path.exists("parts/"+name+"_"+str(i+1)):
-                    os.remove("parts/"+name+"_"+str(i+1))
-            for i in range(l):
-                if os.path.exists("parts/"+name+"_local_"+str(i+1)):
-                    os.remove("parts/"+name+"_local_"+str(i+1))
-
-          # os.remove('2'+file)
-            # os.remove(file)
+        print("**************************************")
+        print(db_upload["upload_requests"])
+        
+        # os.remove('2'+file)
+        # os.remove(file)
+        if os.path.exists("hexdump"):
             os.remove("hexdump")
-            # print(db) 
-        except:
-            pass
+        # print(db) 
+#        except:
+#            pass
+
     dbfile = open('pckl_upload', 'wb')
     pickle.dump(db_upload, dbfile)
     dbfile.close()

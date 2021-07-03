@@ -55,7 +55,7 @@ def decode_partitions(file):
         name = file
         ext = ''
 
-    bashCommand = "./decode " + name
+    bashCommand = "./decode_rs " + name
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output.decode('UTF-8')
@@ -71,77 +71,29 @@ def files_downloaded(name):
     downloaded_files = os.listdir("./parts")
     global_blocks = 0
     local_blocks = 0
-    for i in range(n):
+    for i in range(k):
         if (name+"_"+str(i+1)) in downloaded_files:
             global_blocks = global_blocks + 1
     
-    for i in range(l):
+    for i in range(k,n):
         if (name+"_local_"+str(i+1)) in downloaded_files:
             local_blocks = local_blocks + 1
     return global_blocks,local_blocks
 
-def get_mode(ip_mode = 0):
-    file_names = []
-    num_files_download = 0
-    if ip_mode == 0:
-        for i in range(n):
-            file_names.append(name+"_"+str(i+1))
-        num_files_download = k
-    elif ip_mode == 1:
-        for i in range(n-1,-1,-1):
-            file_names.append(name+"_"+str(i+1))
-        num_files_download = k
-    elif ip_mode == 2:
-        for i in range(k):
-            file_names.append(name+"_"+str(i+1))
-        num_files_download = k
-    elif ip_mode == 3:
-        for i in range(k):
-            file_names.append(name+"_"+str(i+1))
-        for i in range(l):
-            file_names.append(name+"_"+str(i+1))
-        num_files_download = k
-    elif ip_mode == 4:
-        for i in range(l):
-            file_names.append(name+"_"+str(i+1))
-        for i in range(k):
-            file_names.append(name+"_"+str(i+1))
-        num_files_download = k
-    elif ip_mode == 5:
-        for i in range(n):
-            file_names.append(name+"_"+str(i+1))
-        for i in range(l):
-            file_names.append(name+"_"+str(i+1))
-        num_files_download = k+l
-
-    return file_names,num_files_download
-
 def get_files(locations,name):
     file_locations = [locations[name+"_"+str(i+1)] for i in range(n)]
-    file_locations.append(locations[name+"_local_"+str(i+1)] for i in range(l))
 
     final_file_names = []
     num_parity_used = 0
-    for i in range(l):
-        if num_parity_used > r:
-            return
-        count = int(k/l)
-        for j in range(int(k/l)):
-            if file_locations[i*int(k/l)+j] in failed_nodes:
-                count = count - 1
-            else:
-                final_file_names.append(name+"_"+str(i*int(k/l)+j+1))
-
-        if count == int(k/l):
-            continue
-        elif count == (int(k/l)-1):
-            final_file_names.append(name+"_local_"+str(i+1))
+    count = 0
+    for i in range(n):
+        if count == (k+1):
+            break
+        if file_locations[i] in failed_nodes:
+            count = count + 1
         else:
-            while count != int(k/l):
-                count = count + 1
-                final_file_names.append(name+"_"+str(k+num_parity_used+1))
-                num_parity_used = num_parity_used + 1
-    
+            final_file_names.append(name+"_"+str(i+1))
+
     return final_file_names
 
 # Get the files needed to be encoded from command line
@@ -177,22 +129,10 @@ if __name__ == '__main__':
         except:
             name = file
 
-        # ip_mode
-        # 0 : 1 to n global chunks (any k)
-        # 1 : n to 1 global chunks (any k)
-        # 2 : 1 to k global chunks (any k)
-        # 3 : 1 to k global chunks and 1 to l local chunks (any k)
-        # 4 : 1 to l global chunks and 1 to k local chunks (any k)
-        # 5 : 1 to n global chunks and 1 to l local chunks (any k+l)
-
-        ip_mode = 1
-
         file_names = get_files(locations,name)
-        # file_names,num_files_download = get_mode(ip_mode)
 
         # Download Files
-        # download_files(file_names,locations,num_files_download)
-        download_files(file_names,locations,len(file_names))
+        download_files(file_names,locations,k)
         
         tb = unix_time_micros()
 
@@ -212,9 +152,6 @@ if __name__ == '__main__':
         for i in range(k+r):
             if os.path.exists("parts/"+name+"_"+str(i+1)):
                 os.remove("parts/"+name+"_"+str(i+1))
-        for i in range(l):
-           if os.path.exists("parts/"+name+"_local_"+str(i+1)):
-               os.remove("parts/"+name+"_local_"+str(i+1))
 
         if os.path.exists("hexdump_reconstruct"):
             os.remove("hexdump_reconstruct")

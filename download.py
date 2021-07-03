@@ -62,7 +62,7 @@ if __name__ == '__main__':
         ta = unix_time_micros()
         # Download Files
         for i in range(3):
-            if download_api_call(locations[file+"_"+str(i+1)],file+"_"+str(i+1),file):
+            if download_api_call(locations[file+"_copy_"+str(i+1)],file+"_copy_"+str(i+1),file):
                 break
             else:
                 time.sleep(1)
@@ -74,6 +74,7 @@ if __name__ == '__main__':
         
 
         # Delete unnecessary files and folders
+        print("Size of %s - %d MBs" %(file, (os.path.getsize("./parts/"+file)/(1024*1024))))
 
         if os.path.exists("./parts/"+file):
             os.remove("./parts/"+file)

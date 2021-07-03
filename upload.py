@@ -89,8 +89,8 @@ if __name__ == '__main__':
             for i,idx in enumerate(indices):
                 size = os.path.getsize(path+file) 
                 bucket_space[idx] = float(bucket_space[idx])+float(size/(1024*1024))
-                locations[file+"_"+str(i+1)] = buckets[idx]
-                upload_api_call(s3,buckets[idx],path+file,file+"_"+str(i+1))
+                locations[file+"_copy_"+str(i+1)] = buckets[idx]
+                upload_api_call(s3,buckets[idx],path+file,file+"_copy_"+str(i+1))
                 print("Uploading To - ",buckets[idx])
             
             tb = unix_time_micros()

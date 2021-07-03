@@ -14,7 +14,6 @@ epoch = datetime.datetime.utcfromtimestamp(0)
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
 
-
 def add_to_queue(queue,finish):
     finish.value = False
     with open('trace.csv', mode='r') as trace_file:
@@ -60,7 +59,7 @@ def caching(queue,finish):
             requests = []
 
         if not len(queue):
-            if finish.value:
+            if finish.value: 
                 print("NOT HERE")
                 break
             else:
@@ -90,7 +89,15 @@ def caching(queue,finish):
         
         requests.append([curr_time,file,cache_hit,tb-ta])
 
-       
+ 
+    dbfile = open('pckl_upload', 'rb')
+    db_upload = pickle.load(dbfile)
+    dbfile.close()
+    db_upload["cache_requests"] = db_upload["cache_requests"] + requests
+    # print(db_upload["cache_requests"])
+    dbfile = open('pckl_upload', 'wb')
+    pickle.dump(db_upload, dbfile)
+    dbfile.close()
 
 if __name__ == '__main__':
 
