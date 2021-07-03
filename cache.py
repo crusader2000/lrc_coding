@@ -14,6 +14,7 @@ epoch = datetime.datetime.utcfromtimestamp(0)
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
 
+
 def add_to_queue(queue,finish):
     finish.value = False
     with open('trace.csv', mode='r') as trace_file:
@@ -33,7 +34,7 @@ def download_file(name):
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output.decode('UTF-8')
-    # print(output)
+    print(output)
 
 def caching(queue,finish):
     print("STARTED CACHING")
@@ -81,8 +82,8 @@ def caching(queue,finish):
                 f = open(file+"_reconstruct",'rb')
                 client.set(file, f.read())
                 f.close()
-            
-                os.remove(file+"_reconstruct")
+                if os.path.exists(file+"_reconstruct"):
+                      os.remove(file+"_reconstruct")
         except:
             pass
         tb = unix_time_micros()

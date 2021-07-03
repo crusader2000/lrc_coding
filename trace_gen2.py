@@ -22,15 +22,15 @@ urls = []
 files_available = []
 
 with open('urls.csv', mode='r') as url_file:
-     url_reader = csv.reader(url_file)
-     urls = list(itertools.chain.from_iterable(list(url_reader)))
-     for url in urls:
-         print(url)
-         filename = url.rsplit('/', 1)[1]
-         if not os.path.exists("files/"+filename):
-             r = requests.get(url, allow_redirects=True)
-             open("files/"+filename, 'wb').write(r.content)
-         files_available.append(filename)
+    url_reader = csv.reader(url_file)
+    urls = list(itertools.chain.from_iterable(list(url_reader)))
+    for url in urls:
+        print(url)
+        filename = url.rsplit('/', 1)[1]
+        if not os.path.exists("files/"+filename):
+            r = requests.get(url, allow_redirects=True)
+            open("files/"+filename, 'wb').write(r.content)
+        files_available.append(filename)
 
 len_files = len(files_available)
 data = []

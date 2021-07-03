@@ -5,7 +5,7 @@ import datetime
 import pickle
 import random
 import csv
-# from pymemcache.client import base
+from pymemcache.client import base
 import subprocess
 import os
 

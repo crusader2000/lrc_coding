@@ -18,12 +18,11 @@ l = 2 # Num Local Parity Chunks
 n = k + r
 
 
-access_key_id = 'AKIAXJULJPQNZCGYW7H7'
-secret_access_key = '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'
- 
+access_key_id = 'AKIAZFE27KY2ZF6I7E5L'
+secret_access_key = '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' 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
-failed_nodes = ["cachestoregeo1","cachestoregeo15","cachestore29"] # hard code
+failed_nodes = ["cachestore1","cachestore9"] # hard code
 
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
@@ -34,14 +33,14 @@ def connection_S3(loc):
         region_name=loc)
     return s3
 
-def download_api_call(i,bucket_name,file_name):
-    s3_conns[i].download_file(bucket_name,file_name,'./parts/'+file_name)    
+def download_api_call(bucket_name,file_name):
+    s3.download_file(bucket_name,file_name,'./parts/'+file_name)    
 
 def starcall_func(args):
     return download_api_call(*args)
 
 def download_files(file_names,locations,num_files_download):
-    processes_args = [(locations[name][1],locations[name][0],name) for name in file_names]
+    processes_args = [(locations[name],name) for name in file_names]
 
     with multiprocessing.Pool(3) as pool:
         list(islice(pool.imap_unordered(starcall_func, processes_args), num_files_download))
@@ -165,15 +164,10 @@ if __name__ == '__main__':
     #     print(k,v)
     dbfile.close()
     
-    regions = db_upload["aws_regions"]
-    buckets = db_upload["buckets"]
-    bucket_space = db_upload["bucket_space"]
-    locations = db_upload["locations"]
-    
-    s3_conns = [] 
-
-    for loc in regions:
-        s3_conns.append(connection_S3(loc))
+    loc= db_upload["aws_region"]
+    buckets= db_upload["buckets"]
+    locations= db_upload["locations"]
+    s3 = connection_S3(loc)
 
     for file in files:
         time = datetime.datetime.now().__str__()
