@@ -21,10 +21,3 @@ for file in files:
     print("GLOBAL - ",remove_parts)
     for num in remove_parts:
             os.remove(path+str(num+1))
-
-    path = "parts/"+name+"_local_"
-    remove_parts = random.sample(range(2), 1)
-    for num in remove_parts:
-        os.remove(path+str(num+1))
-    print("LOCAL - ",remove_parts)
-    print()

@@ -21,13 +21,11 @@ if __name__ == '__main__':
     # for k,v in db.items():
     #     print(k,v)
     dbfile.close()
-
+    
     db_download = {
-        "download_requests" : [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)"]],
-        "download_vanilla" : [["Time","File Name","Time Taken (in microseconds)"]],
-    }
-
-
+                    "download_requests" : [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)"]],
+                            "download_vanilla" : [["Time","File Name","Time Taken (in microseconds)"]],
+                                }
     dbfile = open('pckl_download', 'wb')
     pickle.dump(db_download, dbfile)
     dbfile.close()

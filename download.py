@@ -14,13 +14,12 @@ from itertools import islice
 import random
 
 
-access_key_id = 'AKIAXJULJPQNZCGYW7H7'
-secret_access_key = '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'
-
+access_key_id = 'AKIAZFE27KY2ZF6I7E5L'
+secret_access_key = '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' 
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 
-failed_nodes = ["cachestoregeo1","cachestoregeo15","cachestoregeo29"] # hard code
+failed_nodes = ["cachestorers1","cachestorers9"] # hard code
 
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
@@ -31,7 +30,7 @@ def connection_S3(loc):
         region_name=loc)
     return s3
 
-def download_api_call(s3,bucket_name,object_name,file_name):
+def download_api_call(bucket_name,object_name,file_name):
     if bucket_name in failed_nodes:
         return False
     s3.download_file(bucket_name,object_name,'./parts/'+file_name)
@@ -53,23 +52,17 @@ if __name__ == '__main__':
     db_upload = pickle.load(dbfile)
     dbfile.close()
 
-    regions = db_upload["aws_regions"]
-    buckets = db_upload["buckets"]
-    bucket_space = db_upload["bucket_space"]
-    locations = db_upload["locations"]
-    
-    s3_conns = [] 
-
-    for loc in regions:
-        s3_conns.append(connection_S3(loc))
-
+    loc= db_upload["aws_region"]
+    buckets= db_upload["buckets"]
+    locations= db_upload["locations"]
+    s3 = connection_S3(loc)
 
     for file in files:
         curr_time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
         # Download Files
         for i in range(3):
-            if download_api_call(s3_conns[locations[file+"_copy_"+str(i+1)][1]],locations[file+"_"+str(i+1)][0],file+"_"+str(i+1),file):
+            if download_api_call(locations[file+"_"+str(i+1)],file+"_"+str(i+1),file):
                 break
             else:
                 time.sleep(1)

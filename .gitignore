@@ -11,7 +11,7 @@ encode
 decode
 decode_rs
 test*
-test.py
+!test.py
 pckl
 uploads.csv
 downloads.csv

@@ -18,13 +18,6 @@ typedef unsigned char u8;
 using namespace std;
 using namespace std::chrono;
 
-void xor_func(u8* res, u8* s,int size){
-    for(int i=0;i<size;i++){
-        res[i] = (u8)((int)res[i] ^ (int)s[i]);
-    }
-}
-
-
 char* readFileBytes(const char *name)
 {
     ifstream fl(name);
@@ -178,41 +171,7 @@ int main(int argc, char *argv[]){
         // cout<<endl;     
         // cout<<endl;     
     
-    // GENERATING LRC BLOCK CODES
-    u8 *local_block_ptr;
-    local_block_ptr = (u8*) malloc(parts);
-
-    for(i=0;i<l;i++){
-        for(j=0;j<parts;j++){
-            local_block_ptr[j] = 0;
-        }   
-        // for(int j=0;j<20;j++){
-        //     cout<<(int) local_block_ptr[j]<<" ";
-        // }
-        // cout<<endl;     
-        for(int j=0;j<(k/l);j++){
-            xor_func(local_block_ptr,frag_ptrs[i*(k/l)+j],parts);
-            // for(int k=0;k<20;k++){
-            //     cout<<(int) local_block_ptr[k]<<" ";
-            // }
-            // cout<<endl;
-
-        }
-
-        // for(int k=0;k<20;k++){
-        //     cout<<(int) local_block_ptr[k]<<" ";
-        // }
-        // cout<<endl;
-        //     cout<<endl;
-
-
-        // string result = convertToString(local_block_ptr,parts);
-
-        string filename = "parts/"+name+"_local_"+to_string(i+1);
-        ofstream outfile(filename,ios::out | ios::binary);
-        outfile.write((char*)local_block_ptr,parts);        
-        outfile.close();
-    }
+    
     // Get ending timepoint
     auto stop = high_resolution_clock::now();
   
