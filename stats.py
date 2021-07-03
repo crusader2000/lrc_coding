@@ -11,7 +11,7 @@ files = list(os.listdir("files2/"))
 dir_size = 0
 for file in files:
     dir_size = dir_size + os.path.getsize("files2/"+file)
-# print("Average File Size - %f MBs" %(dir_size/(1024*1024*len(files))))
+print("Average File Size - %f MBs" %(dir_size/(1024*1024*len(files))))
 
 print("-----------------------------------------------")
 print("Coding")

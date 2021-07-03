@@ -74,7 +74,7 @@ if __name__ == '__main__':
         
 
         # Delete unnecessary files and folders
-
+        print("Size of %s - %d MBs" %(file, (os.path.getsize("./parts/"+file)/(1024*1024))))
         if os.path.exists("./parts/"+file):
             os.remove("./parts/"+file)
     
