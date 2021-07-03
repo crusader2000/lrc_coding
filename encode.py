@@ -180,15 +180,14 @@ if __name__ == '__main__':
 
         db_upload["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
 
-        print("**************************************")
-        print(db_upload["upload_requests"])
         # Delete unnecessary files and folders
         for i in range(k+r):
              if os.path.exists("parts/"+name+"_"+str(i+1)):
                 os.remove("parts/"+name+"_"+str(i+1))
         
-        print("**************************************")
-        print(db_upload["upload_requests"])
+        for i in range(l):
+             if os.path.exists("parts/"+name+"_local_"+str(i+1)):
+                os.remove("parts/"+name+"_local_"+str(i+1))
         
         # os.remove('2'+file)
         # os.remove(file)
