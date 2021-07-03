@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
         db_download["download_vanilla"].append([curr_time,file,time_taken])
         
-
+        print("Size of %s - %f"%(files,(os.path.size("./parts/"+file)/(1024*1024))))
         # Delete unnecessary files and folders
 
         if os.path.exists("./parts/"+file):
