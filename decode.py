@@ -43,7 +43,7 @@ def starcall_func(args):
 def download_files(file_names,locations,num_files_download):
     processes_args = [(locations[name][1],locations[name][0],name) for name in file_names]
 
-    with multiprocessing.Pool(3) as pool:
+    with multiprocessing.Pool(4) as pool:
         list(islice(pool.imap_unordered(starcall_func, processes_args), num_files_download))
 
     return
@@ -212,7 +212,7 @@ if __name__ == '__main__':
 
         global_blocks,local_blocks = files_downloaded(name)
         db_download["download_requests"].append([time,file,os.listdir("./parts"),global_blocks,local_blocks,time_to_download,time_to_decode,total_time_taken])
-        # print(db_download["download_requests"]) 
+        print(db_download["download_requests"][-1]) 
 
         # Delete unnecessary files and folders
         for i in range(k+r):

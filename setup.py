@@ -43,8 +43,8 @@ if __name__ == '__main__':
         print("SETTING UP CONNS")
         s3_conns.append(connection_S3(loc))
 
-    #for i in range(len(regions)):
-    for i in range(1):
+    for i in range(len(regions)):
+    #for i in range(1):
         for j in range(10):
           try:
                 print("cachestoregeo"+str(i*10+j))

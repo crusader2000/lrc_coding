@@ -33,10 +33,10 @@ def get_buckets(bucket_space):
     return indices[:3]
 
 def upload_api_call(s3,bucket_name,file_path,object_name):
-    try:
+    # try:
         response = s3.upload_file(file_path, bucket_name,object_name)
-    except:
-        pass
+    # except:
+      #  pass
 
 if __name__ == '__main__':
     
@@ -92,8 +92,8 @@ if __name__ == '__main__':
                 size = os.path.getsize(path+file) 
                 bucket_space[idx] = float(bucket_space[idx])+float(size/(1024*1024))
                 locations[file+"_copy_"+str(i+1)] = buckets[idx]
-                upload_api_call(s3_conns[idx//10],buckets[idx],path+file,file+"_"+str(i+1))
-                print("Uploading To - ",buckets[idx])
+                upload_api_call(s3_conns[idx//10],buckets[idx][0],path+file,file+"_copy_"+str(i+1))
+                print("Uploading To - ",buckets[idx][0])
             
             tb = unix_time_micros()
             time_taken = tb-ta

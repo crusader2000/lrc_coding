@@ -33,7 +33,7 @@ def download_file(name):
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output.decode('UTF-8')
-    # print(output)
+    print(output)
 
 def caching(queue,finish):
     print("STARTED CACHING")
@@ -59,6 +59,7 @@ def caching(queue,finish):
             requests = []
 
         if not len(queue):
+            print("INSIDE BREAK IF")
             if finish.value:
                 print("NOT HERE")
                 break
@@ -73,18 +74,16 @@ def caching(queue,finish):
         print("CHECKING FILE - ",file,len(queue))
         result = client.get(file)
         cache_hit = 1
-        try:
-            if result is None:
-                cache_hit = 0
-                download_file(file)
+
+        if result is None:
+            cache_hit = 0
+            download_file(file)
+        
+            f = open(file+"_reconstruct",'rb')
+            client.set(file, f.read())
+            f.close()
             
-                f = open(file+"_reconstruct",'rb')
-                client.set(file, f.read())
-                f.close()
-            
-                os.remove(file+"_reconstruct")
-        except:
-            pass
+            os.remove(file+"_reconstruct")
         tb = unix_time_micros()
         
         requests.append([curr_time,file,cache_hit,tb-ta])

@@ -141,7 +141,7 @@ if __name__ == '__main__':
             for row in list(trace_reader):
                 files.append(str(row[-1]))
         files.pop(0)
-        path = "./files/"
+        path = "./files2/"
         
         print(files)
 
@@ -165,7 +165,7 @@ if __name__ == '__main__':
         except:
             name = file
 
-        print("-------------------------------")
+        print("-------------- %d -----------------" %(i))
         if str(name+"_1") in list(locations.keys()):
             continue
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
             count = count + 1
         else:
             break
-        print(name,file,i)
+        print(name,file)
         # try:
         time = datetime.datetime.now().__str__()
         ta = unix_time_micros()

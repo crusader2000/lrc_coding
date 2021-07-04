@@ -13,7 +13,6 @@ import pickle
 from itertools import islice
 import random
 
-
 access_key_id = 'AKIAXJULJPQNZCGYW7H7'
 secret_access_key = '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'
 
@@ -69,7 +68,7 @@ if __name__ == '__main__':
         ta = unix_time_micros()
         # Download Files
         for i in range(3):
-            if download_api_call(s3_conns[locations[file+"_copy_"+str(i+1)][1]],locations[file+"_"+str(i+1)][0],file+"_"+str(i+1),file):
+            if download_api_call(s3_conns[locations[file+"_copy_"+str(i+1)][1]],locations[file+"_copy_"+str(i+1)][0],file+"_copy_"+str(i+1),file):
                 break
             else:
                 time.sleep(1)
@@ -79,11 +78,11 @@ if __name__ == '__main__':
 
         db_download["download_vanilla"].append([curr_time,file,time_taken])
         
-        print("Size of %s - %f"%(files,(os.path.size("./parts/"+file)/(1024*1024))))
+        print("Size of %s - %f"%(files,(os.path.getsize("./parts/"+file)/(1024*1024))))
         # Delete unnecessary files and folders
 
         if os.path.exists("./parts/"+file):
-            os.remove("./parts/"+file)
+           os.remove("./parts/"+file)
     
     dbfile = open('pckl_download', 'wb')
     pickle.dump(db_download, dbfile)
