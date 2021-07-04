@@ -19,12 +19,12 @@ def add_to_queue(queue,finish):
     with open('trace.csv', mode='r') as trace_file:
         trace_reader = csv.reader(trace_file)
         data = list(trace_reader)
-        queue.append(data[1][-1])
+        queue.append(data[1][2])
         # print(datetime.datetime.now(),queue)
         for i in range(2,len(data)):
             # print(float(data[i][0])-float(data[i-1][0]))
             time.sleep(float(data[i][0])-float(data[i-1][0]))
-            queue.append(data[i][-1])
+            queue.append(data[i][2])
             # print(i,datetime.datetime.now(),queue)
     finish.value = True
 

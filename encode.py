@@ -54,11 +54,18 @@ def make_partitions(path,file):
     print(output)
     return
 
-def get_buckets(bucket_space):
+def get_buckets(bucket_space,priority):
+
     indices = np.argsort(bucket_space)
     print(indices)
     print([bucket_space[idx] for idx in indices])
-    random_server_indices = random.sample([indices[i] for i in range(n+l+5)],n+l)
+
+    if priority != '':
+        random_server_indices_data = random.sample([i for i in range(priority*10,(priority+1)*10)],k)
+        random_server_indices_parity = random.sample([i if i not in range(priority*10,(priority+1)*10) for i in range(30)],l+r)
+        random_server_indices = random_server_indices_data + random_server_indices_parity
+    else:
+        random_server_indices = random.sample([indices[i] for i in range(n+l+5)],n+l)
     
     print("random_server_indices")
     print(random_server_indices)
@@ -75,7 +82,7 @@ def upload_api_call(i,bucket_name,file_path,object_name):
       #  print("NOT HERE")
       #  pass
 
-def upload_files(s3_conns,file,locations,buckets,bucket_space):
+def upload_files(s3_conns,file,locations,buckets,bucket_space,priority):
     try:
         name,ext = file.split('.')
     except:
@@ -85,7 +92,7 @@ def upload_files(s3_conns,file,locations,buckets,bucket_space):
     processes_args = []
 
     # random allocation of buckets
-    buckets_idxs = get_buckets(bucket_space)
+    buckets_idxs = get_buckets(bucket_space,priority)
     print(buckets[idx] for idx in buckets_idxs)
 
     size = os.path.getsize("parts/"+name+"_"+str(1)) 
@@ -138,9 +145,13 @@ if __name__ == '__main__':
         files = []
         with open('trace.csv', mode='r') as trace_file:
             trace_reader = csv.reader(trace_file)
-            for row in list(trace_reader):
-                files.append(str(row[-1]))
-        files.pop(0)
+            data = list(trace_reader)
+            data.pop(0)
+            for row in data:
+                if row[3] != '':
+                    files.append((str(row[2]),int(row[3])))
+                else:
+                    files.append((str(row[2]),''))
         path = "./files2/"
         
         print(files)
@@ -156,10 +167,11 @@ if __name__ == '__main__':
         s3_conns.append(connection_S3(loc))
     
     count = 0
-    for i,file in enumerate(files):
+    for i,tpl in enumerate(files):
 
         # shutil.copyfile(file,'2'+file)
-        
+        file,priority = tpl
+
         try:
             name,ext = file.split('.')
         except:
@@ -180,7 +192,7 @@ if __name__ == '__main__':
         make_partitions(path,file)
         tb = unix_time_micros()
         # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-        locations,bucket_space = upload_files(s3_conns,file,locations,buckets,bucket_space)
+        locations,bucket_space = upload_files(s3_conns,file,locations,buckets,bucket_space,priority)
         #  print(locations,bucket_space) 
         db_upload["locations"].update(locations)
         db_upload["bucket_space"] = bucket_space

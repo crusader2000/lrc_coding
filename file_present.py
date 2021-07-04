@@ -8,7 +8,7 @@ files = []
 with open('trace.csv', mode='r') as trace_file:
     trace_reader = csv.reader(trace_file)
     for row in list(trace_reader):
-        files.append(row[-1])
+        files.append(row[2])
     files.pop(0)
 
 client.delete_multi(files)
