@@ -11,7 +11,7 @@ encode
 decode
 decode_rs
 test*
-test.py
+!test.py
 pckl
 uploads.csv
 downloads.csv
@@ -29,9 +29,8 @@ files/*
 backup
 backup/*
 *.csv
-temp.py
 !urls.csv
 pckl*
 key_ids
-files2/*
+libs/usr/
 files2

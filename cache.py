@@ -80,10 +80,13 @@ def caching(queue,finish):
             download_file(file)
         
             f = open(file+"_reconstruct",'rb')
+            temp = f.read()
+            print(temp[:10])
             client.set(file, f.read())
             f.close()
             
-            os.remove(file+"_reconstruct")
+            if os.path.exists(file+"_reconstruct"):
+               os.remove(file+"_reconstruct")
         tb = unix_time_micros()
         
         requests.append([curr_time,file,cache_hit,tb-ta])

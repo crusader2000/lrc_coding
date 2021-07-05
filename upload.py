@@ -74,7 +74,7 @@ if __name__ == '__main__':
         with open('./trace.csv', mode='r') as trace_file:
             trace_reader = csv.reader(trace_file)
             for row in list(trace_reader):
-                files.append(str(list(row)[-1]))
+                files.append(str(list(row)[2]))
         files.pop(0)
         path = "./files2/"
 

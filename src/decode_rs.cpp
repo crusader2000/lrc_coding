@@ -30,7 +30,7 @@ static int gf_gen_decode_matrix_simple(u8 * encode_matrix,
 	int i, j, p, r;
 	int nsrcerrs = 0;
 	u8 s, *b = temp_matrix;
-	u8 frag_in_err[MMAX];
+	u8 frag_in_err[m];
 
 	memset(frag_in_err, 0, sizeof(frag_in_err));
 
@@ -77,13 +77,15 @@ static int gf_gen_decode_matrix_simple(u8 * encode_matrix,
 	return 0;
 }
 
-void decode_data(int n,int k, int r, int parts,vector<int> frag_err_list,u8 **frag_ptrs,u8 **recover_srcs,u8 **recover_outp){
+void decode_data(int n,int k, int r, int parts,vector<int> frag_err_list,u8 **frag_ptrs){
 
 		// Coefficient matrices
 	u8 *encode_matrix, *decode_matrix;
 	u8 *invert_matrix, *temp_matrix;
 	u8 *g_tbls;
-	u8 decode_index[MMAX];
+	u8 decode_index[n];
+	u8 *recover_srcs[k];
+	u8 *recover_outp[k];
 
 	// Allocate coding matrices
 	encode_matrix = (u8*) malloc(n * k);
@@ -91,6 +93,14 @@ void decode_data(int n,int k, int r, int parts,vector<int> frag_err_list,u8 **fr
 	invert_matrix = (u8*) malloc(n * k);
 	temp_matrix = (u8*) malloc(n * k);
 	g_tbls = (u8*) malloc(k * r * 32);
+
+	// Allocate buffers for recovered data
+	for (int i = 0; i < r; i++) {
+		if (NULL == (recover_outp[i] = (u8*) malloc(parts))) {
+			printf("alloc error: Fail\n");
+			return;
+		}
+	}
 
 	if (encode_matrix == NULL || decode_matrix == NULL
 	    || invert_matrix == NULL || temp_matrix == NULL || g_tbls == NULL) {
@@ -132,10 +142,10 @@ void decode_data(int n,int k, int r, int parts,vector<int> frag_err_list,u8 **fr
 }
 
 
-int file_size(int code_length){
+int file_size(int code_length,string name){
     string str;
     for(int i=0;i<code_length;i++){
-        string filename = "parts/myfile_"+to_string(i+1);
+        string filename = "parts/"+name+"_"+to_string(i+1);
         ifstream f(filename, ifstream::binary); 
         if(f) {
             ostringstream ss;
@@ -149,18 +159,15 @@ int file_size(int code_length){
     return -1;
 }
 
-void write_reconstruct_file(int k,int parts,u8** frag_ptrs){
+void write_reconstruct_file(int k,int parts,u8** frag_ptrs,string filename){
 	
     cout<<"WRITE RECONSTRUCT FILE"<<endl;
     string reconstructed_message = "";
-	int lrow_count = 0;
-	while(lrow_count<parts && frag_ptrs[k-1][lrow_count]!='\0')
-			lrow_count++;
+	int lrow_count = parts;
+	while(lrow_count && frag_ptrs[k-1][lrow_count-1]=='\0')
+			lrow_count--;
 
 	// cout<<"LAST ROW COUNT "<<lrow_count<<endl;
-	string main_extension = "";
-    string main_filename = "hexdump";
-    string filename = main_filename+"_reconstruct"+main_extension;
     ofstream outfile(filename, ios::out | ios::binary);
 
     const char *array = reconstructed_message.c_str();
@@ -195,23 +202,45 @@ int main(int argc, char *argv[]){
 
 	int nerrs;
 
-    // Get starting timepoint
+	// Get starting timepoint
     auto start = high_resolution_clock::now();
 
 	// Fragment buffer pointers
-	u8 *frag_ptrs[MMAX];
-	u8 *recover_srcs[KMAX];
-	u8 *recover_outp[KMAX];
+	u8 *frag_ptrs[n];
+
 	vector<int> frag_err_list;
 	vector<int> frag_present_list;
 
+
     int i;
-    string main_extension = "";
-    string main_filename = "hexdump";
-    cout<<"MAIN FILENAME "<<main_filename<<endl;
+    string filename;
+    filename = string(argv[1]);
+    cout<<"FILENAME : "<<filename<<endl;
+
+    string name = "";
+    string ext = "";
+    int curr_pos = 0;
+    while(curr_pos != filename.size()){
+        if(filename[curr_pos] == '.'){
+            curr_pos++;
+            break;
+        }
+        name.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    while(curr_pos != filename.size()){
+        ext.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    if(ext != "")
+	   ext = "."+ext; 
+
+    cout<<"NAME - "<<name<<endl;
+    cout<<"EXT - "<<ext<<endl;
+
 
 	printf("ec_simple_example:\n");
-    int parts = file_size(n);
+    int parts = file_size(n,name);
     cout<<"PARTS : "<<parts<<endl;
 
 	// Allocate the src & parity buffers
@@ -222,18 +251,10 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	// Allocate buffers for recovered data
-	for (i = 0; i < r; i++) {
-		if (NULL == (recover_outp[i] = (u8*) malloc(parts))) {
-			printf("alloc error: Fail\n");
-			return -1;
-		}
-	}
-
     cout<<"READ FILES"<<endl;
     for(int i=0;i<n;i++){
-
-        string filename = "parts/myfile_"+to_string(i+1);
+		
+        string filename = "parts/"+name+"_"+to_string(i+1);
         ifstream f(filename, ifstream::binary); //taking file as inputstream
         string str;
         // cout<<filename<<endl;
@@ -281,14 +302,14 @@ int main(int argc, char *argv[]){
 
 
 	if (src_errs > 0) {
-		if(src_errs > r) {
+		if(nerrs > r) {
 			cout<<"NOT DECODABLE"<<endl;
 			return -1;
 		} else {
-			for(i=0;i<src_errs;i++)
+			for(i=0;i<nerrs;i++)
 				printf("Error at postition - %d\n",frag_err_list[i]);
 		
-			decode_data(n,k, r, parts,frag_err_list,frag_ptrs,recover_srcs,recover_outp);
+			decode_data(n,k, r, parts,frag_err_list,frag_ptrs);
 
 			for (i = 0; i < n; i++){
 				for (j = 0; j < 20; j++){
@@ -300,7 +321,7 @@ int main(int argc, char *argv[]){
 			cout<<endl;
 		}
 	}
-	write_reconstruct_file(k,parts,frag_ptrs);
+	write_reconstruct_file(k,parts,frag_ptrs,name+"_reconstruct"+ext);
 	cout<<endl;
 	// Get ending timepoint
     auto stop = high_resolution_clock::now();

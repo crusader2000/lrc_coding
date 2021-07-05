@@ -43,7 +43,7 @@ def starcall_func(args):
 def download_files(file_names,locations,num_files_download):
     processes_args = [(locations[name][1],locations[name][0],name) for name in file_names]
 
-    with multiprocessing.Pool(4) as pool:
+    with multiprocessing.Pool(3) as pool:
         list(islice(pool.imap_unordered(starcall_func, processes_args), num_files_download))
 
     return
@@ -56,15 +56,12 @@ def decode_partitions(file):
         name = file
         ext = ''
 
-    bashCommand = "./decode " + name
+    bashCommand = "./decode " + name+ext
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output.decode('UTF-8')
     print(output)
     print(name)
-    bashCommand = "xxd -plain -revert hexdump_reconstruct " +name+"_reconstruct"+ext
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
 
     return
 
@@ -222,9 +219,6 @@ if __name__ == '__main__':
            if os.path.exists("parts/"+name+"_local_"+str(i+1)):
                os.remove("parts/"+name+"_local_"+str(i+1))
 
-        if os.path.exists("hexdump_reconstruct"):
-            os.remove("hexdump_reconstruct")
-    
     print("PRNITNG DB") 
     dbfile = open('pckl_download', 'wb')
     pickle.dump(db_download, dbfile)

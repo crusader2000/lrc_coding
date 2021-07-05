@@ -38,19 +38,19 @@ def make_partitions(path,file):
         name,ext = file.split('.')
     except:
         name = file
+    try:
+        shutil.copy(path+file,file)
+    except:
+        pass
 
-    bashCommand = "xxd -plain " +path+file+" hexdump"
-
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-
-    bashCommand = "./encode " + name
+    bashCommand = "./encode " + file
 
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
 
     output, error = process.communicate()
     output = output.decode('UTF-8')
 
+    os.remove(file)
     print(output)
     return
 
@@ -62,7 +62,7 @@ def get_buckets(bucket_space,priority):
 
     if priority != '':
         random_server_indices_data = random.sample([i for i in range(priority*10,(priority+1)*10)],k)
-        random_server_indices_parity = random.sample([i if i not in range(priority*10,(priority+1)*10) for i in range(30)],l+r)
+        random_server_indices_parity = random.sample([i for i in range(30) if i not in range(priority*10,(priority+1)*10)],l+r)
         random_server_indices = random_server_indices_data + random_server_indices_parity
     else:
         random_server_indices = random.sample([indices[i] for i in range(n+l+5)],n+l)
@@ -171,13 +171,13 @@ if __name__ == '__main__':
 
         # shutil.copyfile(file,'2'+file)
         file,priority = tpl
-
         try:
             name,ext = file.split('.')
         except:
             name = file
 
         print("-------------- %d -----------------" %(i))
+        print(file,priority)
         if str(name+"_1") in list(locations.keys()):
             continue
 
@@ -213,13 +213,6 @@ if __name__ == '__main__':
             if os.path.exists("parts/"+name+"_local_"+str(i+1)):
                 os.remove("parts/"+name+"_local_"+str(i+1))
 
-        # os.remove('2'+file)
-        # os.remove(file)
-        if os.path.exists("hexdump"):
-            os.remove("hexdump")
-        # print(db) 
-        # except:
-        #     pass
 
     dbfile = open('pckl_upload', 'wb')
     pickle.dump(db_upload, dbfile)
