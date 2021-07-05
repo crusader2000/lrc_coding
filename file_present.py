@@ -14,8 +14,8 @@ with open('trace.csv', mode='r') as trace_file:
 client.delete_multi(files)
 for file in files:
     result = client.get(file)
-    # print(file)
     if result is not None:
+        client.set(file,"ansj")
         print("FILE PRESENT")
 
 dbfile = open('pckl_upload', 'rb')

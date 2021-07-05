@@ -24,20 +24,6 @@ void xor_func(u8* res, u8* s,int size){
     }
 }
 
-
-char* readFileBytes(const char *name)
-{
-    ifstream fl(name);
-    fl.seekg( 0, ios::end );
-    size_t len = fl.tellg();
-    char *ret = new char[len];
-    fl.seekg(0, ios::beg); 
-    fl.read(ret, len);
-    fl.close();
-    return ret;
-}
-
-
 std::string format_duration( std::chrono::microseconds ms ) {
     using namespace std::chrono;
     auto secs = duration_cast<seconds>(ms);
@@ -71,11 +57,29 @@ int main(int argc, char *argv[]){
     u8 *g_tbls;
 
 
-    string name;
-    name = string(argv[1]);
-    cout<<"FILENAME : "<<name<<endl;
+    string filename;
+    filename = string(argv[1]);
+    cout<<"FILENAME : "<<filename<<endl;
 
-    ifstream f("hexdump",  ios::in | ios::binary ); //taking file as inputstream
+    string name = "";
+    string ext = "";
+    int curr_pos = 0;
+    while(curr_pos != filename.size()){
+        if(filename[curr_pos] == '.'){
+            curr_pos++;
+            break;
+        }
+        name.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    while(curr_pos != filename.size()){
+        ext.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    cout<<"NAME - "<<name<<endl;
+    cout<<"EXT - "<<ext<<endl;
+
+    ifstream f(filename,  ios::in | ios::binary ); //taking file as inputstream
     string str;
     if(f) {
         ostringstream ss;

@@ -238,7 +238,7 @@ int file_size(int code_length,string name){
     return -1;
 }
 
-void write_reconstruct_file(int k,int parts,u8** frag_ptrs){
+void write_reconstruct_file(int k,int parts,u8** frag_ptrs,string filename){
 	
     cout<<"WRITE RECONSTRUCT FILE"<<endl;
     string reconstructed_message = "";
@@ -247,7 +247,6 @@ void write_reconstruct_file(int k,int parts,u8** frag_ptrs){
 			lrow_count--;
 
 	// cout<<"LAST ROW COUNT "<<lrow_count<<endl;
-	string filename = "hexdump_reconstruct";
     ofstream outfile(filename, ios::out | ios::binary);
 
     const char *array = reconstructed_message.c_str();
@@ -290,11 +289,32 @@ int main(int argc, char *argv[]){
 
 	vector<int> frag_err_list;
 	vector<int> frag_present_list;
+	
+	int i;
 
-    int i;
-    string name;
-    name = string(argv[1]);
-    cout<<"FILENAME : "<<name<<endl;
+    string filename;
+    filename = string(argv[1]);
+    cout<<"FILENAME : "<<filename<<endl;
+
+    string name = "";
+    string ext = "";
+    int curr_pos = 0;
+    while(curr_pos != filename.size()){
+        if(filename[curr_pos] == '.'){
+            curr_pos++;
+            break;
+        }
+        name.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    while(curr_pos != filename.size()){
+        ext.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    cout<<"NAME - "<<name<<endl;
+    cout<<"EXT - "<<ext<<endl;
+
+    ifstream f(filename,  ios::in | ios::binary ); //taking file as inputstream
 
 
 	printf("ec_simple_example:\n");
@@ -381,7 +401,7 @@ int main(int argc, char *argv[]){
 			cout<<endl;
 		}
 	}
-	write_reconstruct_file(k,parts,frag_ptrs);
+	write_reconstruct_file(k,parts,frag_ptrs,name+"_reconstruct."+ext);
 	cout<<endl;
 	// Get ending timepoint
     auto stop = high_resolution_clock::now();

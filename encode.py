@@ -37,19 +37,19 @@ def make_partitions(path,file):
         name,ext = file.split('.')
     except:
         name = file
+    try:
+        shutil.copy(path+file,file)
+    except:
+        pass
 
-    bashCommand = "xxd -plain " +path+file+" hexdump"
-
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-
-    bashCommand = "./encode " + name
+    bashCommand = "./encode " + file
 
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
 
     output, error = process.communicate()
     output = output.decode('UTF-8')
 
+    # os.remove(file)
     print(output)
     return
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     #     print(k,v)
     dbfile.close()
 
-    read_from_cmdline = False
+    read_from_cmdline = True
     path = "./"
     
     if read_from_cmdline:
@@ -169,39 +169,32 @@ if __name__ == '__main__':
         else:
             break
         print(name,file)
-        try:
-            time = datetime.datetime.now().__str__()
-            ta = unix_time_micros()
-            make_partitions(path,file)
-            tb = unix_time_micros()
-            # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-            locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
-           #  print(locations,bucket_space) 
-            db_upload["locations"].update(locations)
-            db_upload["bucket_space"] = bucket_space
-        
-            tc = unix_time_micros()
-        
-            time_to_encode = tb-ta
-            time_to_upload = tc-tb
-            total_time_taken = tc-ta
+        time = datetime.datetime.now().__str__()
+        ta = unix_time_micros()
+        make_partitions(path,file)
+        tb = unix_time_micros()
+        # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
+        locations,bucket_space = upload_files(file,locations,buckets,bucket_space)
+        #  print(locations,bucket_space) 
+        db_upload["locations"].update(locations)
+        db_upload["bucket_space"] = bucket_space
 
-            db_upload["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
+        tc = unix_time_micros()
 
-            # Delete unnecessary files and folders
-            for i in range(k+r):
-                if os.path.exists("parts/"+name+"_"+str(i+1)):
-                    os.remove("parts/"+name+"_"+str(i+1))
-            for i in range(l):
-                if os.path.exists("parts/"+name+"_local_"+str(i+1)):
-                    os.remove("parts/"+name+"_local_"+str(i+1))
+        time_to_encode = tb-ta
+        time_to_upload = tc-tb
+        total_time_taken = tc-ta
 
-          # os.remove('2'+file)
-            # os.remove(file)
-            os.remove("hexdump")
-            # print(db) 
-        except:
-            pass
+        db_upload["upload_requests"].append([time,file,time_to_encode,time_to_upload,total_time_taken])
+
+        # Delete unnecessary files and folders
+        for i in range(k+r):
+            if os.path.exists("parts/"+name+"_"+str(i+1)):
+                os.remove("parts/"+name+"_"+str(i+1))
+        for i in range(l):
+            if os.path.exists("parts/"+name+"_local_"+str(i+1)):
+                os.remove("parts/"+name+"_local_"+str(i+1))
+
     dbfile = open('pckl_upload', 'wb')
     pickle.dump(db_upload, dbfile)
     dbfile.close()

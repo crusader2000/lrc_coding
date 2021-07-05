@@ -38,7 +38,7 @@ def download_file(name):
 
 def caching(queue,finish):
     print("STARTED CACHING")
-    client = base.Client(('localhost', 11211))
+    client = base.Client(('127.0.0.1', 11211))
 
     requests = []
     count = 0
@@ -79,8 +79,11 @@ def caching(queue,finish):
             download_file(file)
         
             f = open(file+"_reconstruct",'rb')
+            temp = f.read()
+            print(temp[:10])
             client.set(file, f.read())
             f.close()
+            
             if os.path.exists(file+"_reconstruct"):
                os.remove(file+"_reconstruct")
         tb = unix_time_micros()
