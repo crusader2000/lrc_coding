@@ -188,8 +188,8 @@ if __name__ == '__main__':
         # file_names,num_files_download = get_mode(ip_mode)
         # download_files(file_names,locations,num_files_download)
 
-        # file_names = get_files(locations,name)
-        # download_files(file_names,locations,len(file_names))
+        file_names = get_files(locations,name)
+        download_files(file_names,locations,len(file_names))
         
         tb = unix_time_micros()
 

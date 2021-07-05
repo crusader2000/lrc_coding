@@ -32,3 +32,5 @@ backup/*
 !urls.csv
 pckl*
 key_ids
+libs/usr/
+files2

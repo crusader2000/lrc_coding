@@ -232,6 +232,9 @@ int main(int argc, char *argv[]){
         ext.push_back(filename[curr_pos]);
         curr_pos++;
     }
+    if(ext != "")
+	   ext = "."+ext; 
+
     cout<<"NAME - "<<name<<endl;
     cout<<"EXT - "<<ext<<endl;
 
@@ -318,7 +321,7 @@ int main(int argc, char *argv[]){
 			cout<<endl;
 		}
 	}
-	write_reconstruct_file(k,parts,frag_ptrs,name+"_reconstruct."+ext);
+	write_reconstruct_file(k,parts,frag_ptrs,name+"_reconstruct"+ext);
 	cout<<endl;
 	// Get ending timepoint
     auto stop = high_resolution_clock::now();

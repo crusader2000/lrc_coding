@@ -49,7 +49,7 @@ def make_partitions(path,file):
     output, error = process.communicate()
     output = output.decode('UTF-8')
 
-    # os.remove(file)
+    os.remove(file)
     print(output)
     return
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     #     print(k,v)
     dbfile.close()
 
-    read_from_cmdline = True
+    read_from_cmdline = False
     path = "./"
     
     if read_from_cmdline:
