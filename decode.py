@@ -55,15 +55,12 @@ def decode_partitions(file):
         name = file
         ext = ''
 
-    bashCommand = "./decode_rs " + name
+    bashCommand = "./decode_rs " + name+ext
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output.decode('UTF-8')
     print(output)
     print(name)
-    bashCommand = "xxd -plain -revert hexdump_reconstruct " +name+"_reconstruct"+ext
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
 
     return
 
@@ -76,7 +73,7 @@ def files_downloaded(name):
             global_blocks = global_blocks + 1
     
     for i in range(k,n):
-        if (name+"_local_"+str(i+1)) in downloaded_files:
+        if (name+"_"+str(i+1)) in downloaded_files:
             local_blocks = local_blocks + 1
     return global_blocks,local_blocks
 
@@ -132,7 +129,7 @@ if __name__ == '__main__':
         file_names = get_files(locations,name)
 
         # Download Files
-        download_files(file_names,locations,k)
+        download_files(file_names,locations,len(file_names))
         
         tb = unix_time_micros()
 

@@ -29,7 +29,8 @@ files/*
 backup
 backup/*
 *.csv
-temp.py
 !urls.csv
 pckl*
 key_ids
+libs/usr/
+files2

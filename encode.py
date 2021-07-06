@@ -37,19 +37,19 @@ def make_partitions(path,file):
         name,ext = file.split('.')
     except:
         name = file
+    try:
+        shutil.copy(path+file,file)
+    except:
+        pass
 
-    bashCommand = "xxd -plain " +path+file+" hexdump"
-
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-
-    bashCommand = "./encode " + name
+    bashCommand = "./encode " + file
 
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
 
     output, error = process.communicate()
     output = output.decode('UTF-8')
 
+    os.remove(file)
     print(output)
     return
 
@@ -153,14 +153,14 @@ if __name__ == '__main__':
         except:
             name = file
         print("-------------- %d  -----------------" %(i))
-#         if str(name+"_1") in list(locations.keys()):
- #           continue
+        if str(name+"_1") in list(locations.keys()):
+           continue
 
         if count < 10:
             count = count + 1
         else:
             break
-        print(name,file)
+        print(name,file,i)
     #    try:
         time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
@@ -188,14 +188,6 @@ if __name__ == '__main__':
         for i in range(l):
              if os.path.exists("parts/"+name+"_local_"+str(i+1)):
                 os.remove("parts/"+name+"_local_"+str(i+1))
-        
-        # os.remove('2'+file)
-        # os.remove(file)
-        if os.path.exists("hexdump"):
-            os.remove("hexdump")
-        # print(db) 
-#        except:
-#            pass
 
     dbfile = open('pckl_upload', 'wb')
     pickle.dump(db_upload, dbfile)

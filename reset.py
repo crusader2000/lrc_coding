@@ -29,14 +29,14 @@ if __name__ == '__main__':
         # except:
         #    pass
         # print()
-
         try:
+            delete_items = []
             for x in res['Contents']:
-                print(x['Key'])
-                s3.delete_object(Bucket="cachestorers"+str(i), Key=x['Key'])
+                delete_items.append({"Key" : x['Key']})
+            print(delete_items)
+            s3.delete_objects(Bucket="cachestore"+str(i), Delete = {'Objects':delete_items})
         except:
-            pass
-            
+            pass            
     # database
     db_upload = {
         "locations" : {

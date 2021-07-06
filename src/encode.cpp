@@ -18,18 +18,11 @@ typedef unsigned char u8;
 using namespace std;
 using namespace std::chrono;
 
-char* readFileBytes(const char *name)
-{
-    ifstream fl(name);
-    fl.seekg( 0, ios::end );
-    size_t len = fl.tellg();
-    char *ret = new char[len];
-    fl.seekg(0, ios::beg); 
-    fl.read(ret, len);
-    fl.close();
-    return ret;
+void xor_func(u8* res, u8* s,int size){
+    for(int i=0;i<size;i++){
+        res[i] = (u8)((int)res[i] ^ (int)s[i]);
+    }
 }
-
 
 std::string format_duration( std::chrono::microseconds ms ) {
     using namespace std::chrono;
@@ -64,11 +57,29 @@ int main(int argc, char *argv[]){
     u8 *g_tbls;
 
 
-    string name;
-    name = string(argv[1]);
-    cout<<"FILENAME : "<<name<<endl;
+    string filename;
+    filename = string(argv[1]);
+    cout<<"FILENAME : "<<filename<<endl;
 
-    ifstream f("hexdump",  ios::in | ios::binary ); //taking file as inputstream
+    string name = "";
+    string ext = "";
+    int curr_pos = 0;
+    while(curr_pos != filename.size()){
+        if(filename[curr_pos] == '.'){
+            curr_pos++;
+            break;
+        }
+        name.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    while(curr_pos != filename.size()){
+        ext.push_back(filename[curr_pos]);
+        curr_pos++;
+    }
+    cout<<"NAME - "<<name<<endl;
+    cout<<"EXT - "<<ext<<endl;
+
+    ifstream f(filename,  ios::in | ios::binary ); //taking file as inputstream
     string str;
     if(f) {
         ostringstream ss;
@@ -171,7 +182,41 @@ int main(int argc, char *argv[]){
         // cout<<endl;     
         // cout<<endl;     
     
-    
+    // GENERATING LRC BLOCK CODES
+    u8 *local_block_ptr;
+    local_block_ptr = (u8*) malloc(parts);
+
+    for(i=0;i<l;i++){
+        for(j=0;j<parts;j++){
+            local_block_ptr[j] = 0;
+        }   
+        // for(int j=0;j<20;j++){
+        //     cout<<(int) local_block_ptr[j]<<" ";
+        // }
+        // cout<<endl;     
+        for(int j=0;j<(k/l);j++){
+            xor_func(local_block_ptr,frag_ptrs[i*(k/l)+j],parts);
+            // for(int k=0;k<20;k++){
+            //     cout<<(int) local_block_ptr[k]<<" ";
+            // }
+            // cout<<endl;
+
+        }
+
+        // for(int k=0;k<20;k++){
+        //     cout<<(int) local_block_ptr[k]<<" ";
+        // }
+        // cout<<endl;
+        //     cout<<endl;
+
+
+        // string result = convertToString(local_block_ptr,parts);
+
+        string filename = "parts/"+name+"_local_"+to_string(i+1);
+        ofstream outfile(filename,ios::out | ios::binary);
+        outfile.write((char*)local_block_ptr,parts);        
+        outfile.close();
+    }
     // Get ending timepoint
     auto stop = high_resolution_clock::now();
   

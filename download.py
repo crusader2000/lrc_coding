@@ -57,10 +57,11 @@ if __name__ == '__main__':
     locations= db_upload["locations"]
     s3 = connection_S3(loc)
 
-    for file in files:
+    for i,file in enumerate(files):
         curr_time = datetime.datetime.now().__str__()
         ta = unix_time_micros()
         # Download Files
+        print(i,file)
         for i in range(3):
             if download_api_call(locations[file+"_copy_"+str(i+1)],file+"_copy_"+str(i+1),file):
                 break

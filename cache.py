@@ -73,18 +73,17 @@ def caching(queue,finish):
         print("CHECKING FILE - ",file,len(queue))
         result = client.get(file)
         cache_hit = 1
-        try:
-            if result is None:
-                cache_hit = 0
-                download_file(file)
-            
-                f = open(file+"_reconstruct",'rb')
-                client.set(file, f.read())
-                f.close()
-                if os.path.exists(file+"_reconstruct"):
-                      os.remove(file+"_reconstruct")
-        except:
-            pass
+        if result is None:
+            cache_hit = 0
+            download_file(file)
+        
+            f = open(file+"_reconstruct",'rb')
+            temp = f.read()
+            print(temp[:10])
+            client.set(file, f.read())
+            f.close()
+            if os.path.exists(file+"_reconstruct"):
+                os.remove(file+"_reconstruct")
         tb = unix_time_micros()
         
         requests.append([curr_time,file,cache_hit,tb-ta])
