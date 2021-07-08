@@ -33,7 +33,7 @@ if __name__ == '__main__':
     }
 
     db_download = {
-        "download_requests" : [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)"]],
+        "download_requests" : [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)","Size"]],
         "download_vanilla" : [["Time","File Name","Time Taken (in microseconds)"]],
     }
 

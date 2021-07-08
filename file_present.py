@@ -35,7 +35,7 @@ db_download = pickle.load(dbfile)
 #     print(k,v)
 dbfile.close()
 
-db_download["download_requests"] = [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)"]]
+db_download["download_requests"] = [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)","Size"]]
 
 
 dbfile = open('pckl_download', 'wb')

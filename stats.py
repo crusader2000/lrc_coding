@@ -1,5 +1,6 @@
 import csv
 import os
+import pickle
 
 with open('trace.csv', mode='r') as trace_file:
     trace_reader = csv.reader(trace_file)
@@ -11,7 +12,7 @@ files = list(os.listdir("files2/"))
 dir_size = 0
 for file in files:
     dir_size = dir_size + os.path.getsize("files2/"+file)
-print("Average File Size - %f MBs" %(dir_size/(1024*1024*len(files))))
+#print("Average File Size - %f MBs" %(dir_size/(1024*1024*len(files))))
 
 print("-----------------------------------------------")
 print("Coding")
@@ -43,6 +44,37 @@ with open('downloads.csv',mode='r') as downloads_file:
     print("Average Decoding Latency (sec /req) - ",decoding_latency/(len(data)-1))
 print()
 
+dbfile = open('pckl_upload_random', 'rb')
+db_upload = pickle.load(dbfile)
+dbfile.close()
+
+dbfile = open('pckl_download_random', 'rb')
+db_download = pickle.load(dbfile)
+dbfile.close()
+
+locations = db_upload["locations"]
+
+download_reqs = db_download["download_requests"]
+
+load = {}
+traffic = {}
+
+for i in range(1,len(download_reqs)):
+    files_downloaded = list(download_reqs[i][2])
+    # print(files_downloaded)
+    for file in files_downloaded:
+        try:
+            load[locations[file][0]] = load[locations[file][0]] + 1
+            traffic[locations[file][0]] =  traffic[locations[file][0]] + float(download_reqs[i][8])
+        except:
+            load[locations[file][0]] = 1
+            traffic[locations[file][0]] = float(download_reqs[i][8])
+
+for k,v in load.items():
+    print(k,v)
+
+for k,v in traffic.items():
+    print(k,v)
 
 print("-----------------------------------------------")
 print("Vanilla Download")
