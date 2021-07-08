@@ -62,9 +62,9 @@ with open('requests.txt','r') as f:
 
 
 for i in range(len(data)):
-    if files_dict[data[i][2]] > 1:
-        data[i].append(0)
-    else:
+    #if files_dict[data[i][2]] > 1:
+     #   data[i].append(0)
+    #else:
         data[i].append(None)
 
 # print(data)

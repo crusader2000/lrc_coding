@@ -23,7 +23,7 @@ secret_access_key = 'E1CBUZy7zYrObfKSu2grKffxSZJ0bbGOCsIfqS8H'
  
 epoch = datetime.datetime.utcfromtimestamp(0)
 
-failed_nodes = ["cachestoregeo1","cachestoregeo15","cachestore29"] # hard code
+failed_nodes = ["cachestoregeorand1","cachestoregeorand15","cachestorerand29"] # hard code
 
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)

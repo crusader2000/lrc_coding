@@ -44,16 +44,16 @@ if __name__ == '__main__':
 
     for i in range(len(regions)):
         for j in range(10):
-            db_upload["buckets"].append(["cachestoregeo"+str(i*10+j),i])
-            print("BUCKET - "+"cachestoregeo"+str(i*10+j))
-            res = s3_conns[i].list_objects(Bucket = "cachestoregeo"+str(i*10+j))
+            db_upload["buckets"].append(["cachestoregeorand"+str(i*10+j),i])
+            print("BUCKET - "+"cachestoregeorand"+str(i*10+j))
+            res = s3_conns[i].list_objects(Bucket = "cachestoregeorand"+str(i*10+j))
             try:
                 delete_items = []
                 for x in res['Contents']:
                     # print(x['Key'])
                     delete_items.append({'Key':x['Key']})
                 print(delete_items)
-                s3_conns[i].delete_objects(Bucket="cachestoregeo"+str(i*10+j), Delete={'Objects':delete_items})
+                s3_conns[i].delete_objects(Bucket="cachestoregeorand"+str(i*10+j), Delete={'Objects':delete_items})
             except:
                 pass
     

@@ -31,4 +31,3 @@ if __name__ == '__main__':
     dbfile = open('pckl_download', 'wb')
     pickle.dump(db_download, dbfile)
     dbfile.close()
-
