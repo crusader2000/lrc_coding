@@ -32,4 +32,3 @@ if __name__ == '__main__':
     pickle.dump(db_download, dbfile)
     dbfile.close()
 
-        "download_requests" : [["Time","File Name","Files Downloaded","Num Global Blocks","Num Local Parity","Time To Download (in microseconds)","Time To Decode (in microseconds)","Total Time Taken (in microseconds)","Size"]]

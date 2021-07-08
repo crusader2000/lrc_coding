@@ -44,11 +44,11 @@ with open('downloads.csv',mode='r') as downloads_file:
     print("Average Decoding Latency (sec /req) - ",decoding_latency/(len(data)-1))
 print()
 
-dbfile = open('pckl_upload_random', 'rb')
+dbfile = open('pckl_upload', 'rb')
 db_upload = pickle.load(dbfile)
 dbfile.close()
 
-dbfile = open('pckl_download_random', 'rb')
+dbfile = open('pckl_download', 'rb')
 db_download = pickle.load(dbfile)
 dbfile.close()
 
