@@ -23,7 +23,7 @@ secret_access_key = 'E1CBUZy7zYrObfKSu2grKffxSZJ0bbGOCsIfqS8H'
  
 epoch = datetime.datetime.utcfromtimestamp(0)
 
-failed_nodes = ["cachestoregeo1","cachestoregeo15","cachestore29"] # hard code
+failed_nodes = ["cachestoregeo1","cachestoregeo15","cachestoregeo29"] # hard code
 
 def unix_time_micros():
     return int((datetime.datetime.now() - epoch).total_seconds() * 1000000.0)
@@ -117,13 +117,12 @@ def get_mode(ip_mode = 0):
     return file_names,num_files_download
 
 def get_files(locations,name):
-    file_locations = [locations[name+"_"+str(i+1)][0] for i in range(n)]
-    file_locations.append(locations[name+"_local_"+str(i+1)][0] for i in range(l))
-
+    file_locations = [locations[name+"_"+str(i+1)][0] for i in range(n)] + [locations[name+"_local_"+str(i+1)][0] for i in range(l)]
+    
     final_file_names = []
     num_parity_used = 0
     for i in range(l):
-        if num_parity_used > r:
+        if num_parity_used >= r:
             return
         count = int(k/l)
         for j in range(int(k/l)):
@@ -135,13 +134,15 @@ def get_files(locations,name):
         if count == int(k/l):
             continue
         elif count == (int(k/l)-1):
-            final_file_names.append(name+"_local_"+str(i+1))
-        else:
-            while count != int(k/l):
+            if file_locations[n+i] not in failed_nodes:
+                final_file_names.append(name+"_local_"+str(i+1))
+                continue
+        while count != int(k/l):
+            if file_locations[k+num_parity_used] not in failed_nodes:
                 count = count + 1
                 final_file_names.append(name+"_"+str(k+num_parity_used+1))
-                num_parity_used = num_parity_used + 1
-    
+
+            num_parity_used = num_parity_used + 1
     return final_file_names
 
 # Get the files needed to be encoded from command line

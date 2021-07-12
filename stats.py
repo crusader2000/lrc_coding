@@ -70,11 +70,20 @@ for i in range(1,len(download_reqs)):
             load[locations[file][0]] = 1
             traffic[locations[file][0]] = float(download_reqs[i][8])
 
-for k,v in load.items():
-    print(k,v)
-
-for k,v in traffic.items():
-    print(k,v)
+for i in range(30):
+    x = "cachestoregeo"+str(i)
+    try:
+        print(x,load[x])
+    except:
+        print(x,0)
+print()
+print()
+for i in range(30):
+    x = "cachestoregeo"+str(i)
+    try:
+        print(x,traffic[x])
+    except:
+        print(x,0)
 
 print("-----------------------------------------------")
 print("Vanilla Download")
