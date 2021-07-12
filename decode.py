@@ -118,11 +118,13 @@ def get_mode(ip_mode = 0):
 
 def get_files(locations,name):
     file_locations = [locations[name+"_"+str(i+1)][0] for i in range(n)] + [locations[name+"_local_"+str(i+1)][0] for i in range(l)]
+    print(file_locations) 
     
     final_file_names = []
     num_parity_used = 0
+    
     for i in range(l):
-        if num_parity_used >= r:
+        if num_parity_used > r:
             return
         count = int(k/l)
         for j in range(int(k/l)):
@@ -130,19 +132,22 @@ def get_files(locations,name):
                 count = count - 1
             else:
                 final_file_names.append(name+"_"+str(i*int(k/l)+j+1))
-
+        
         if count == int(k/l):
             continue
         elif count == (int(k/l)-1):
             if file_locations[n+i] not in failed_nodes:
                 final_file_names.append(name+"_local_"+str(i+1))
                 continue
+
         while count != int(k/l):
             if file_locations[k+num_parity_used] not in failed_nodes:
                 count = count + 1
                 final_file_names.append(name+"_"+str(k+num_parity_used+1))
 
             num_parity_used = num_parity_used + 1
+    
+
     return final_file_names
 
 # Get the files needed to be encoded from command line
@@ -198,6 +203,7 @@ if __name__ == '__main__':
 
         # Download Files
         # download_files(file_names,locations,num_files_download)
+        print(file_names)
         size = download_files(file_names,locations,len(file_names))
         
         tb = unix_time_micros()

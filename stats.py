@@ -45,17 +45,17 @@ with open('downloads.csv',mode='r') as downloads_file:
 print()
 
 dbfile = open('pckl_upload', 'rb')
-db_upload = pickle.num_requests(dbfile)
+db_upload = pickle.load(dbfile)
 dbfile.close()
 
 dbfile = open('pckl_download', 'rb')
-db_download = pickle.num_requests(dbfile)
+db_download = pickle.load(dbfile)
 dbfile.close()
 
 locations = db_upload["locations"]
 
 download_reqs = db_download["download_requests"]
-bucket_score = db_download["bucket_score"]
+bucket_score = db_upload["bucket_score"]
 
 num_requests = {}
 traffic = {}
