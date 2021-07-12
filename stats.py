@@ -45,18 +45,19 @@ with open('downloads.csv',mode='r') as downloads_file:
 print()
 
 dbfile = open('pckl_upload', 'rb')
-db_upload = pickle.load(dbfile)
+db_upload = pickle.num_requests(dbfile)
 dbfile.close()
 
 dbfile = open('pckl_download', 'rb')
-db_download = pickle.load(dbfile)
+db_download = pickle.num_requests(dbfile)
 dbfile.close()
 
 locations = db_upload["locations"]
 
 download_reqs = db_download["download_requests"]
+bucket_score = db_download["bucket_score"]
 
-load = {}
+num_requests = {}
 traffic = {}
 
 for i in range(1,len(download_reqs)):
@@ -64,26 +65,28 @@ for i in range(1,len(download_reqs)):
     # print(files_downloaded)
     for file in files_downloaded:
         try:
-            load[locations[file][0]] = load[locations[file][0]] + 1
+            num_requests[locations[file][0]] = num_requests[locations[file][0]] + 1
             traffic[locations[file][0]] =  traffic[locations[file][0]] + float(download_reqs[i][8])
         except:
-            load[locations[file][0]] = 1
+            num_requests[locations[file][0]] = 1
             traffic[locations[file][0]] = float(download_reqs[i][8])
 
+print("NUM REQUESTS")
 for i in range(30):
-    x = "cachestoregeo"+str(i)
+    x = "cachestorealgo"+str(i)
     try:
-        print(x,load[x])
+        print(x,num_requests[x])
     except:
         print(x,0)
 print()
-print()
+print("TRAFFIC (in MBs)")
 for i in range(30):
-    x = "cachestoregeo"+str(i)
+    x = "cachestorealgo"+str(i)
     try:
         print(x,traffic[x])
     except:
         print(x,0)
+
 
 print("-----------------------------------------------")
 print("Vanilla Download")

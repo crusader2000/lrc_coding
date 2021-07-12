@@ -51,3 +51,7 @@ To generate CSVs of Download and Upload Requests, run
 ```
 python3 make_csv.py
 ```
+
+
+memcached -d -m 2048 -u root -l 127.0.0.1 -p 11211
+

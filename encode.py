@@ -17,7 +17,7 @@ k = 6 # Num Data Chunks
 r = 2 # Num Global Parity Chunks
 l = 2 # Num Local Parity Chunks
 n = k + r # Num Code Chunks
-
+alpha = 3 # Score For Popular items
 
 access_key_id = 'AKIAXJULJPQNZCGYW7H7'
 secret_access_key = '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'
@@ -54,25 +54,25 @@ def make_partitions(path,file):
     print(output)
     return
 
-def get_buckets(bucket_space,priority):
-
-    indices = np.argsort(bucket_space)
-    print(indices)
-    print([bucket_space[idx] for idx in indices])
+def get_buckets(bucket_score,priority):
 
     if priority != '':
-        random_server_indices_data = random.sample([i for i in range(priority*10,(priority+1)*10)],k)
-        random_server_indices_parity = random.sample([i for i in range(30) if i not in range(priority*10,(priority+1)*10)],l+r)
+        indices1 = sorted([(bucket_score[i],i) for i in range(priority*10,(priority+1)*10)])
+        indices2 = sorted([(bucket_score[i],i) for i in range(30) if i not in range(priority*10,(priority+1)*10)])
+
+        random_server_indices_data = [indices1[i][1] for i in range(k)]
+        random_server_indices_parity = [indices2[i][1] for i in range(r+l)]
         random_server_indices = random_server_indices_data + random_server_indices_parity
     else:
-        random_server_indices = random.sample([indices[i] for i in range(n+l+5)],n+l)
+        indices = np.argsort(bucket_score)
+        random_server_indices = [indices[i] for i in range(n+l)]
     
-    print("random_server_indices")
-    print(random_server_indices)
+    # print("random_server_indices")
+    # print(random_server_indices)
     
-    print("[buckets[idx] for idx in random_server_indices]")
-    print([buckets[idx] for idx in random_server_indices])
-    print([bucket_space[idx] for idx in random_server_indices])
+    # print("[buckets[idx] for idx in random_server_indices]")
+    # print([buckets[idx] for idx in random_server_indices])
+    # print([bucket_score[idx] for idx in random_server_indices])
     return random_server_indices
 
 def upload_api_call(i,bucket_name,file_path,object_name):
@@ -82,7 +82,7 @@ def upload_api_call(i,bucket_name,file_path,object_name):
       #  print("NOT HERE")
       #  pass
 
-def upload_files(s3_conns,file,locations,buckets,bucket_space,priority):
+def upload_files(s3_conns,file,locations,buckets,bucket_space,bucket_score,priority):
     try:
         name,ext = file.split('.')
     except:
@@ -92,7 +92,7 @@ def upload_files(s3_conns,file,locations,buckets,bucket_space,priority):
     processes_args = []
 
     # random allocation of buckets
-    buckets_idxs = get_buckets(bucket_space,priority)
+    buckets_idxs = get_buckets(bucket_score,priority)
     print(buckets[idx] for idx in buckets_idxs)
 
     size = os.path.getsize("parts/"+name+"_"+str(1)) 
@@ -101,26 +101,22 @@ def upload_files(s3_conns,file,locations,buckets,bucket_space,priority):
         locations[name+"_"+str(i+1)] = buckets[buckets_idxs[i]]
         bucket_space[buckets_idxs[i]] = float(bucket_space[buckets_idxs[i]])+float(size/(1024*1024))
         processes_args.append((buckets_idxs[i]//10,buckets[buckets_idxs[i]][0],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1)))
-        # p = multiprocessing.Process(target=upload_api_call, 
-        #     args=(s3,buckets[buckets_idxs[i]],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1),))
-        # p.start()
-        # processes.append(p)
+        if priority and i<k:
+            bucket_score[buckets_idxs[i]] = bucket_score[buckets_idxs[i]] + alpha
+        else:
+            bucket_score[buckets_idxs[i]] = bucket_score[buckets_idxs[i]] + 1
+
     
-    for i in range(l):    
+    for i in range(l):
         locations[name+"_local_"+str(i+1)] = buckets[buckets_idxs[n+i]]
         bucket_space[buckets_idxs[n+i]] = float(bucket_space[buckets_idxs[n+i]])+float(size/(1024*1024))
         processes_args.append((buckets_idxs[n+i]//10,buckets[buckets_idxs[n+i]][0],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1)))
-        # p = multiprocessing.Process(target=upload_api_call, 
-        #     args=(s3,buckets[buckets_idxs[n+i]],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1),))
-        # p.start()
-        # processes.append(p)
+        bucket_score[buckets_idxs[n+i]] = bucket_score[buckets_idxs[i]] + 1
+    
     p = multiprocessing.Pool()
     p.starmap(upload_api_call, processes_args)
-    # for p in processes:
-    #     p.join()
 
-    # return locations
-    return locations,bucket_space
+    return locations,bucket_space,bucket_score
 
 
 # Get the files needed to be encoded from command line
@@ -159,6 +155,7 @@ if __name__ == '__main__':
     regions = db_upload["aws_regions"]
     buckets = db_upload["buckets"]
     bucket_space = db_upload["bucket_space"]
+    bucket_score = db_upload["bucket_score"]
     locations = db_upload["locations"]
     
     s3_conns = [] 
@@ -192,10 +189,11 @@ if __name__ == '__main__':
         make_partitions(path,file)
         tb = unix_time_micros()
         # MAKE A CODE FOR RANDOM ALLOCATION OF BUCKETS
-        locations,bucket_space = upload_files(s3_conns,file,locations,buckets,bucket_space,priority)
+        locations,bucket_space,bucket_score = upload_files(s3_conns,file,locations,buckets,bucket_space,bucket_score,priority)
         #  print(locations,bucket_space) 
         db_upload["locations"].update(locations)
         db_upload["bucket_space"] = bucket_space
+        db_upload["bucket_score"] = bucket_score
     
         tc = unix_time_micros()
     

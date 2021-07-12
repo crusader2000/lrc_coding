@@ -48,11 +48,11 @@ if __name__ == '__main__':
     #for i in range(1):
         for j in range(10):
           try:
-                print("cachestoregeo"+str(i*10+j))
+                print("cachestorealgo"+str(i*10+j))
                 location = {'LocationConstraint': regions[i]}
-                s3_conns[i].create_bucket(Bucket="cachestoregeo"+str(i*10+j),
+                s3_conns[i].create_bucket(Bucket="cachestorealgo"+str(i*10+j),
                                         CreateBucketConfiguration=location)
-                db_upload["buckets"].append(["cachestoregeo"+str(i*10+j),i])
+                db_upload["buckets"].append(["cachestorealgo"+str(i*10+j),i])
           except:
               continue
     

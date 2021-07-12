@@ -26,9 +26,9 @@ if __name__ == '__main__':
     for i in range(len(regions)):
     # for i in range(1,2):
         for j in range(10):
-            print("cachestoregeo"+str(i*10+j))
+            print("cachestorealgo"+str(i*10+j))
             try:
-                s3_conns[i].delete_bucket(Bucket="cachestoregeo"+str(i*10+j))
+                s3_conns[i].delete_bucket(Bucket="cachestorealgo"+str(i*10+j))
             except:
                 continue
 

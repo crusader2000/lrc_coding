@@ -60,9 +60,9 @@ with open('requests.txt','r') as f:
         except:
             files_dict[items[-1]] = 1
 
-
+gamma = 2
 for i in range(len(data)):
-    if files_dict[data[i][2]] > 1:
+    if files_dict[data[i][2]] > gamma:  # condition to become popular
         data[i].append(0)
     else:
         data[i].append(None)
