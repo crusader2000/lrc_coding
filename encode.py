@@ -57,15 +57,19 @@ def make_partitions(path,file):
 def get_buckets(bucket_score,priority):
 
     if priority != '':
-        indices1 = sorted([(bucket_score[i],i) for i in range(priority*10,(priority+1)*10)])
-        indices2 = sorted([(bucket_score[i],i) for i in range(30) if i not in range(priority*10,(priority+1)*10)])
+        indices1 = sorted([(bucket_score[i][0],i) for i in range(priority*10,(priority+1)*10)])
+        indices2 = sorted([(bucket_score[i][1],i) for i in range(30) if i not in range(priority*10,(priority+1)*10)])
 
         random_server_indices_data = [indices1[i][1] for i in range(k)]
         random_server_indices_parity = [indices2[i][1] for i in range(r+l)]
         random_server_indices = random_server_indices_data + random_server_indices_parity
     else:
-        indices = np.argsort(bucket_score)
-        random_server_indices = [indices[i] for i in range(n+l)]
+        indices1 = sorted([(bucket_score[i][0],i) for i in range(30)])
+        random_server_indices_data = [indices1[i][1] for i in range(k)]
+
+        indices2 = sorted([(bucket_score[i][1],i) for i in range(30) if i not in random_server_indices_data])
+        random_server_indices_parity = [indices2[i][1] for i in range(r+l)]
+        random_server_indices = random_server_indices_data + random_server_indices_parity
     
     # print("random_server_indices")
     # print(random_server_indices)
@@ -102,19 +106,21 @@ def upload_files(s3_conns,file,locations,buckets,bucket_space,bucket_score,prior
         bucket_space[buckets_idxs[i]] = float(bucket_space[buckets_idxs[i]])+float(size/(1024*1024))
         processes_args.append((buckets_idxs[i]//10,buckets[buckets_idxs[i]][0],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1)))
         if priority and i<k:
-            bucket_score[buckets_idxs[i]] = bucket_score[buckets_idxs[i]] + alpha
+            bucket_score[buckets_idxs[i]][0] = bucket_score[buckets_idxs[i]][0] + 1
         elif i<k:
-            bucket_score[buckets_idxs[i]] = bucket_score[buckets_idxs[i]] + 1
+            bucket_score[buckets_idxs[i]][0] = bucket_score[buckets_idxs[i]][0] + 1
+        else:
+            bucket_score[buckets_idxs[i]][1] = bucket_score[buckets_idxs[i]][1] + 1
 
     
     for i in range(l):
         locations[name+"_local_"+str(i+1)] = buckets[buckets_idxs[n+i]]
         bucket_space[buckets_idxs[n+i]] = float(bucket_space[buckets_idxs[n+i]])+float(size/(1024*1024))
         processes_args.append((buckets_idxs[n+i]//10,buckets[buckets_idxs[n+i]][0],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1)))
-        # if priority:
-           # bucket_score[buckets_idxs[n+i]] = bucket_score[buckets_idxs[n+i]] + alpha
-        # else:
-           # bucket_score[buckets_idxs[n+i]] = bucket_score[buckets_idxs[n+i]] + 1
+        if priority:
+            bucket_score[buckets_idxs[n+i]][1] = bucket_score[buckets_idxs[n+i]][1] + 1
+        else:
+            bucket_score[buckets_idxs[n+i]][1] = bucket_score[buckets_idxs[n+i]][1] + 1
     
     p = multiprocessing.Pool()
     p.starmap(upload_api_call, processes_args)

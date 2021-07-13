@@ -30,7 +30,7 @@ if __name__ == '__main__':
         "aws_regions" : regions,
         "buckets" : [],
         "bucket_space" : [0 for i in range(len(regions)*10)],
-        "bucket_score" : [0 for i in range(len(regions)*10)]
+        "bucket_score" : [[0,0] for i in range(len(regions)*10)]
     }
 
     db_download = {
