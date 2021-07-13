@@ -59,17 +59,20 @@ bucket_score = db_upload["bucket_score"]
 
 num_requests = {}
 traffic = {}
+files = {}
 
 for i in range(1,len(download_reqs)):
     files_downloaded = list(download_reqs[i][2])
     # print(files_downloaded)
     for file in files_downloaded:
-        try:
-            num_requests[locations[file][0]] = num_requests[locations[file][0]] + 1
-            traffic[locations[file][0]] =  traffic[locations[file][0]] + float(download_reqs[i][8])
-        except:
-            num_requests[locations[file][0]] = 1
-            traffic[locations[file][0]] = float(download_reqs[i][8])
+            try:
+                num_requests[locations[file][0]] = num_requests[locations[file][0]] + 1
+                traffic[locations[file][0]] =  traffic[locations[file][0]] + float(download_reqs[i][8])
+                files[locations[file][0]].append(file) 
+            except:
+                num_requests[str(locations[file][0])] = 1
+                traffic[locations[file][0]] = float(download_reqs[i][8])
+                files[locations[file][0]] = [file] 
 
 print("NUM REQUESTS")
 for i in range(30):
@@ -88,6 +91,20 @@ for i in range(30):
         print(x,0)
 
 
+for i in range(30):
+    parity_count = 0
+
+    try:
+        print("cachestorealgo"+str(i),len(files["cachestorealgo"+str(i)]),len(set(files["cachestorealgo"+str(i)])))
+        for f in files["cachestorealgo"+str(i)]:
+            if f[6:] in ["_7","_8","_local_1","_local_2"]:
+                parity_count = parity_count + 1
+        # print(files["cachestorealgo"+str(i)])
+        print(parity_count,len(files["cachestorealgo"+str(i)])-parity_count)
+        print()
+        print()
+    except:
+        pass
 print("-----------------------------------------------")
 print("Vanilla Download")
 print("-----------------------------------------------")

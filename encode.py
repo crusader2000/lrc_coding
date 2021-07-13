@@ -103,7 +103,7 @@ def upload_files(s3_conns,file,locations,buckets,bucket_space,bucket_score,prior
         processes_args.append((buckets_idxs[i]//10,buckets[buckets_idxs[i]][0],"parts/"+name+"_"+str(i+1),name+"_"+str(i+1)))
         if priority and i<k:
             bucket_score[buckets_idxs[i]] = bucket_score[buckets_idxs[i]] + alpha
-        else:
+        elif i<k:
             bucket_score[buckets_idxs[i]] = bucket_score[buckets_idxs[i]] + 1
 
     
@@ -111,7 +111,10 @@ def upload_files(s3_conns,file,locations,buckets,bucket_space,bucket_score,prior
         locations[name+"_local_"+str(i+1)] = buckets[buckets_idxs[n+i]]
         bucket_space[buckets_idxs[n+i]] = float(bucket_space[buckets_idxs[n+i]])+float(size/(1024*1024))
         processes_args.append((buckets_idxs[n+i]//10,buckets[buckets_idxs[n+i]][0],"parts/"+name+"_local_"+str(i+1),name+"_local_"+str(i+1)))
-        bucket_score[buckets_idxs[n+i]] = bucket_score[buckets_idxs[i]] + 1
+        # if priority:
+           # bucket_score[buckets_idxs[n+i]] = bucket_score[buckets_idxs[n+i]] + alpha
+        # else:
+           # bucket_score[buckets_idxs[n+i]] = bucket_score[buckets_idxs[n+i]] + 1
     
     p = multiprocessing.Pool()
     p.starmap(upload_api_call, processes_args)

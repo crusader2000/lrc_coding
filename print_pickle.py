@@ -19,3 +19,22 @@ dbfile.close()
 
 # print(json.dumps(db_download, indent = 3))
 print(db_upload["locations"])
+print(len(db_upload["locations"].keys()))
+
+files = {}
+
+for k,v in db_upload["locations"].items():
+    try:
+        files[v[0]].append(k)
+    except:
+        files[v[0]] = [k]
+
+for i in range(30):
+    try:
+        print("cachestorealgo"+str(i))
+        print(files["cachestorealgo"+str(i)])
+        print()
+        print()
+    except:
+        pass
+
