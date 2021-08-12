@@ -55,5 +55,7 @@ python3 make_csv.py
 
 #### APPENDIX:
 Preparing EC2: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/compile-software.html
+
 Installing Memcached: https://www.journaldev.com/1/install-memcached-mac
+
 Starting Memcached: ``memcached -d -m 2048 -u root -l 127.0.0.1 -p 11211``
