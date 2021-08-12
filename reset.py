@@ -2,8 +2,8 @@ import pickle
 import boto3
 
 
-access_key_id = 'AKIAZFE27KY2ZF6I7E5L'
-secret_access_key = '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' 
+access_key_id = ''
+secret_access_key = '' 
 def connection_S3(loc):
     s3 = boto3.client('s3',aws_access_key_id = access_key_id,
         aws_secret_access_key=secret_access_key,
@@ -34,7 +34,7 @@ if __name__ == '__main__':
             for x in res['Contents']:
                 delete_items.append({"Key" : x['Key']})
             print(delete_items)
-            s3.delete_objects(Bucket="cachestore"+str(i), Delete = {'Objects':delete_items})
+            s3.delete_objects(Bucket="cachestorers"+str(i), Delete = {'Objects':delete_items})
         except:
             pass            
     # database
