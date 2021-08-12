@@ -2,8 +2,8 @@ import pickle
 import boto3
 
 
-access_key_id = 'AKIAXJULJPQNZCGYW7H7'
-secret_access_key = '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'
+access_key_id = ''
+secret_access_key = ''
  
 
 def connection_S3(loc):
