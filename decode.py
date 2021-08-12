@@ -18,8 +18,8 @@ l = 2 # Num Local Parity Chunks
 n = k + r
 
 
-access_key_id = 'AKIAXJULJPQNZCGYW7H7'
-secret_access_key = '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'
+access_key_id = ''
+secret_access_key = ''
  
 epoch = datetime.datetime.utcfromtimestamp(0)
 
@@ -141,6 +141,8 @@ def get_files(locations,name):
                 continue
 
         while count != int(k/l):
+            if num_parity_used > r:
+                return
             if file_locations[k+num_parity_used] not in failed_nodes:
                 count = count + 1
                 final_file_names.append(name+"_"+str(k+num_parity_used+1))

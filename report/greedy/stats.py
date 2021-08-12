@@ -1,18 +1,13 @@
 import csv
 import os
 import pickle
+import numpy as np
 
 with open('trace.csv', mode='r') as trace_file:
     trace_reader = csv.reader(trace_file)
     data = list(trace_reader)
     print("NUMBER OF REQUESTS PER SEC - ",(len(data)-1)/float(data[-1][0]))
     print("Total Number of Requests - ",(len(data)-1))
-
-files = list(os.listdir("files2/"))
-dir_size = 0
-for file in files:
-    dir_size = dir_size + os.path.getsize("files2/"+file)
-#print("Average File Size - %f MBs" %(dir_size/(1024*1024*len(files))))
 
 print("-----------------------------------------------")
 print("Coding")
@@ -55,7 +50,6 @@ dbfile.close()
 locations = db_upload["locations"]
 
 download_reqs = db_download["download_requests"]
-bucket_score = db_upload["bucket_score"]
 
 num_requests = {}
 traffic = {}
@@ -101,16 +95,17 @@ for i in range(30):
     parity_count = 0
 
     try:
-        print("cachestorealgo"+str(i),len(files["cachestorealgo"+str(i)]),len(set(files["cachestorealgo"+str(i)])))
-        for f in files["cachestorealgo"+str(i)]:
+        # print("cachestoregeo"+str(i),len(files["cachestoregeo"+str(i)]),len(set(files["cachestoregeo"+str(i)])))
+        for f in files["cachestoregeo"+str(i)]:
             if f[6:] in ["_7","_8","_local_1","_local_2"]:
                 parity_count = parity_count + 1
-        # print(files["cachestorealgo"+str(i)])
-        print(parity_count,len(files["cachestorealgo"+str(i)])-parity_count)
-        print()
-        print()
+        # print(files["cachestoregeo"+str(i)])
+        print("cachestoregeo"+str(i),parity_count,len(files["cachestoregeo"+str(i)])-parity_count)
+        # print()
+        # print()
     except:
         pass
+        
 print("-----------------------------------------------")
 print("Vanilla Download")
 print("-----------------------------------------------")
